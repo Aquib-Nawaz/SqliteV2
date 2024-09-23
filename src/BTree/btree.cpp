@@ -28,7 +28,10 @@ void nodeSplit2(BNode* left, BNode* right, BNode* old){
         lenReq += offSize + old->getOffset(i+1)-old->getOffset(i);
     }
     right->_setHeader(old->bType(), old->nBytes()-i-1);
+    right->nodeAppendRange(old, 0,i+1, old->nKeys()-i-1);
 
+    left->_setHeader(old->bType(), i+1);
+    left->nodeAppendRange(old, 0, 0, i+1);
 }
 
 std::vector<BNode*> nodeSplit3(BNode* old){

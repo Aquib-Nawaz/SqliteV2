@@ -142,11 +142,11 @@ void BNode::nodeAppendKV(uint16_t idx, std::vector<uint8_t> &key, std::vector<ui
 }
 
 void BNode::nodeAppendRange(BNode* oldNode,  uint16_t destStart, uint16_t start, uint16_t num) {
-    std::vector<uint8_t >key,val;
-    for(int i=0;i<num;i++){
-        key = oldNode->getKey(start+i);
-        val = oldNode->getVal(start+i);
-        nodeAppendKV(destStart+i, key,val);
+    uint16_t dataLen = oldNode->getOffset(start+num) - oldNode->getOffset(start);
+    memcpy(data + kvPos(destStart), oldNode->data + oldNode->kvPos(start), dataLen);
+    uint16_t offSetOffSet = getOffset(destStart)-oldNode->getOffset(start);
+    for (uint16_t i = 1; i <= num; ++i) {
+        setOffset(destStart+i, oldNode->getOffset(start+i) + offSetOffSet);
     }
 }
 

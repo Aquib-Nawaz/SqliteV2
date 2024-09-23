@@ -25,11 +25,11 @@ enum BTreeNodeType {
 
 class BNode {
     uint64_t btype, nkeys;
+    uint8_t *data;
     static uint16_t offsetPos(uint16_t);
     uint16_t _btype();
     uint16_t _nkeys();
 public:
-    uint8_t *data;
     BNode(uint8_t []);
     BNode(uint16_t , uint16_t);
     uint16_t bType() const;
