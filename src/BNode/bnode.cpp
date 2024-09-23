@@ -6,11 +6,8 @@
 #include <cassert>
 #include "../DataConversion/convertor.h"
 
-BNode::BNode(uint8_t bytes[]) {
-    data = new uint8_t[BTREE_PAGE_SIZE];
-    memcpy(data, bytes, BTREE_PAGE_SIZE);
-    btype = _btype();
-    nkeys = _nkeys();
+BNode::BNode(uint8_t *bytes) {
+    data = bytes;
 }
 
 BNode::BNode( uint16_t btype, uint16_t nkeys) {
@@ -153,11 +150,20 @@ void BNode::nodeAppendRange(BNode* oldNode,  uint16_t destStart, uint16_t start,
     }
 }
 
-BNode* leafInsert(BNode* oldNode, uint16_t idx, std::vector<uint8_t>&key,
-                std::vector<uint8_t>&val) {
-    auto newNode = new BNode(BTREE_LEAF, oldNode->nKeys()+1);
-    newNode->nodeAppendRange(oldNode, 0, 0, idx);
-    newNode->nodeAppendKV(idx, key, val);
-    newNode->nodeAppendRange(oldNode, idx+1, idx, oldNode->nKeys()-idx);
-    return newNode;
+void BNode::leafInsert( BNode* oldNode, uint16_t idx, std::vector<uint8_t>&key,
+                        std::vector<uint8_t>&val) {
+    nodeAppendRange(oldNode, 0, 0, idx);
+    nodeAppendKV(idx, key, val);
+    nodeAppendRange(oldNode, idx+1, idx, oldNode->nKeys()-idx);
+}
+
+void BNode::shrink(uint16_t ns) {
+    uint8_t *newData = new uint8_t[ns*BTREE_PAGE_SIZE];
+    memcpy(newData, data, ns*BTREE_PAGE_SIZE);
+    delete[] data;
+    data = newData;
+}
+
+BNode::~BNode() {
+    delete[] data;
 }

@@ -21,10 +21,10 @@ static const char* setOffsetTest(){
     BNode bnode(BTREE_INTERIOR,1);
     bnode.setOffset(1, 24);
     mu_assert("interior bnode.setOffset does not match bnode.getOffset", bnode.getOffset(1) == 24);
-    bnode = BNode(BTREE_LEAF,3);
-    bnode.setOffset(2,25);
-    bnode.setOffset(1,33);
-    mu_assert("leaf bnode.setOffset does not match bnode.getOffset", bnode.getOffset(2) == 25 && bnode.getOffset(1)==33);
+    BNode leaf(BTREE_LEAF,3);
+    leaf.setOffset(2,25);
+    leaf.setOffset(1,33);
+    mu_assert("leaf leaf.setOffset does not match leaf.getOffset", leaf.getOffset(2) == 25 && leaf.getOffset(1)==33);
     return nullptr;
 }
 
@@ -76,12 +76,35 @@ static const char *nodeLookUpLETest(){
     return nullptr;
 }
 
+static const char* leafInsertTest() {
+    BNode bnode(BTREE_INTERIOR, 9);
+    std::vector<uint8_t >data(1),v;
+    for(uint8_t i=0;i<5;i++){
+        data[0] = i;
+        bnode.nodeAppendKV(i, data, v);
+    }
+
+    for(uint8_t i=6;i<10;i++){
+        data[0] = i;
+        bnode.nodeAppendKV(i-1, data, v);
+    }
+    BNode newNode(BTREE_INTERIOR, 10);
+    data[0]=5;
+    newNode.leafInsert(&bnode, 5, data, v);
+    mu_assert("Size Match", newNode.nKeys() == 10);
+    for(int i=0;i<10;i++){
+        data[0] = i;
+        mu_assert("key mismatch", newNode.getKey(i) == data);
+    }
+    return nullptr;
+}
 static const char* all_tests(){
     mu_run_test(setHeaderTest);
     mu_run_test(setOffsetTest);
     mu_run_test(setPtrTest);
     mu_run_test(nodeAppendKVLeafTest);
     mu_run_test(nodeLookUpLETest);
+    mu_run_test(leafInsertTest);
     return nullptr;
 }
 

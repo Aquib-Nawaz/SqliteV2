@@ -24,17 +24,18 @@ enum BTreeNodeType {
 
 
 class BNode {
-    uint8_t *data;
     uint64_t btype, nkeys;
     static uint16_t offsetPos(uint16_t);
     uint16_t _btype();
-    void _setHeader(uint16_t,uint16_t);
     uint16_t _nkeys();
 public:
+    uint8_t *data;
     BNode(uint8_t []);
     BNode(uint16_t , uint16_t);
     uint16_t bType() const;
     uint16_t nKeys() const;
+    void _setHeader(uint16_t,uint16_t);
+    void shrink(uint16_t ns);
     uint16_t nBytes();
     uint16_t getOffset(uint16_t);
     void setOffset( uint16_t, uint16_t);
@@ -47,8 +48,9 @@ public:
     void modifyData(uint16_t srcPos, void *, uint16_t );
     void nodeAppendRange( BNode* ,  uint16_t , uint16_t , uint16_t);
     void nodeAppendKV( uint16_t , std::vector<uint8_t>&, std::vector<uint8_t>&, uint64_t ptr=0);
+    void leafInsert( BNode* , uint16_t , std::vector<uint8_t>&,
+                    std::vector<uint8_t>&);
+    ~BNode();
 };
 
-BNode* leafInsert(BNode* , uint16_t , std::vector<uint8_t>&,
-                  std::vector<uint8_t>&);
 #endif //SQLITEV2_BNODE_H
