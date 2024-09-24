@@ -112,13 +112,11 @@ static const char * leafDeleteTest(){
     mu_assert("Size Match", newNode.nKeys() == 8);
     for(int i=0;i<5;i++){
         data[0] = i;
-        std::string err = "Key Mismatch " + to_string(i);
-        mu_assert(err.c_str(), newNode.getKey(i) == data);
+        mu_assert("Key Mismatch", newNode.getKey(i) == data);
     }
     for(int i=6;i<9;i++){
         data[0] = i;
-        std::string err = "Key Mismatch " + to_string(i);
-        mu_assert(err.c_str(), newNode.getKey(i-1) == data);
+        mu_assert("Key Mismatch", newNode.getKey(i-1) == data);
     }
     return nullptr;
 }

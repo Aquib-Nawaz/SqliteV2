@@ -1,5 +1,3 @@
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "misc-no-recursion"
 //
 // Created by Aquib Nawaz on 21/09/24.
 //
@@ -100,7 +98,7 @@ BNode* BTree::nodeDelete(BNode* par,uint16_t idx,std::vector<uint8_t >&key){
         {
             auto merged = new BNode(1);
             nodeMerge(merged, sibling, updated);
-            del(idx-1);
+            del(par->getPtr(idx-1));
             auto fkey = merged->getKey(0);
             nodeReplace2Kid(newNode, par, idx-1, insert(merged), fkey);
             break;
@@ -109,7 +107,7 @@ BNode* BTree::nodeDelete(BNode* par,uint16_t idx,std::vector<uint8_t >&key){
         {
             auto merged = new BNode(1);
             nodeMerge(merged, updated, sibling);
-            del(idx);
+            del(par->getPtr(idx+1));
             auto fkey = merged->getKey(0);
             nodeReplace2Kid(newNode, par, idx, insert(merged), fkey);
             break;
@@ -178,14 +176,15 @@ void nodeSplit2(BNode* left, BNode* right, BNode* old){
     int i;
     uint16_t lenReq = HEADER_SIZE;
 
-    for(i=old->nKeys()-1; lenReq<=BTREE_PAGE_SIZE; i--){
-        lenReq += offSize + old->getOffset(i+1)-old->getOffset(i);
+    for(i=old->nKeys(); lenReq<=BTREE_PAGE_SIZE; i--){
+        lenReq += offSize + old->getOffset(i)-old->getOffset(i-1);
     }
-    right->_setHeader(old->bType(), old->nBytes()-i-1);
-    right->nodeAppendRange(old, 0,i+1, old->nKeys()-i-1);
+    i++;
+    right->_setHeader(old->bType(), old->nKeys()-i);
+    right->nodeAppendRange(old, 0,i, old->nKeys()-i);
 
-    left->_setHeader(old->bType(), i+1);
-    left->nodeAppendRange(old, 0, 0, i+1);
+    left->_setHeader(old->bType(), i);
+    left->nodeAppendRange(old, 0, 0, i);
     delete old;
 }
 
@@ -262,7 +261,12 @@ BNode* BTree::get(uint64_t ptr) {
     return ret;
 }
 
-
-
-
-#pragma clang diagnostic pop
+void nodeReplace2Kid(BNode* newNode, BNode* oldNode, uint16_t idx, uint64_t ptr,
+                std::vector<uint8_t > &key){
+    //delete idx and idx+1
+    newNode->_setHeader(BTREE_INTERIOR, oldNode->nKeys()-1);
+    newNode->nodeAppendRange(oldNode,0,0,idx);
+    std::vector<uint8_t >val;
+    newNode->nodeAppendKV(idx, key, val, ptr);
+    newNode->nodeAppendRange(oldNode, idx+1, idx+2, oldNode->nKeys()-idx-2);
+}

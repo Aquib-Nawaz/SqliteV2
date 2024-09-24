@@ -122,6 +122,7 @@ void BNode::modifyData(uint16_t pos, void * srcData, uint16_t len){
 
 void BNode::nodeAppendKV(uint16_t idx, std::vector<uint8_t> &key, std::vector<uint8_t>& val, uint64_t ptr) {
     if(bType() == BTREE_INTERIOR) {
+        assert(val.empty());
         setPtr(idx,ptr);
     }
     uint16_t pos = kvPos(idx);
