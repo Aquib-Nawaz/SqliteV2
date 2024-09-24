@@ -35,6 +35,8 @@ std::vector<BNode*> nodeSplit3(BNode* );
 void nodeSplit2(BNode* , BNode* , BNode* );
 void checkLimit(std::vector<uint8_t >&,std::vector<uint8_t >&);
 void nodeMerge(BNode*,BNode*,BNode*);
+void nodeReplace2Kid(BNode*,BNode*,uint16_t, uint64_t , std::vector<uint8_t>&);
+
 
 
 #endif //SQLITEV2_BTREE_H
