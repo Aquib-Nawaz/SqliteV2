@@ -1,9 +1,21 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "misc-no-recursion"
 //
 // Created by Aquib Nawaz on 21/09/24.
 //
 
 #include "btree.h"
 #include <cassert>
+
+BTree::BTree(){
+    root = 0;
+    memory = new DBMemory();
+}
+
+BTree::~BTree(){
+    del(root);
+    delete memory;
+}
 
 void BTree::nodeReplaceKidN( BNode* oldNode, BNode* newNode, uint16_t idx,
         std::vector<BNode*> kids){
@@ -40,7 +52,7 @@ BNode* BTree::treeDelete(BNode *oldNode, std::vector<uint8_t> & key) {
         default:
             assert(false);
     }
-    delete oldNode;
+//    delete oldNode;
     return newNode;
 }
 BNode* BTree::treeInsert(BNode* oldNode, std::vector<uint8_t>& key, std::vector<uint8_t>& val){
@@ -57,7 +69,7 @@ BNode* BTree::treeInsert(BNode* oldNode, std::vector<uint8_t>& key, std::vector<
         default:
             assert(false);
     }
-    delete oldNode;
+//    delete oldNode;
     return newNode;
 }
 
@@ -67,7 +79,7 @@ void BTree::nodeInsert(BNode* old,BNode* newNode,uint16_t idx,
     auto prevChild = get(kptr);
     auto knode = treeInsert( prevChild, key, value);
     auto splits = nodeSplit3(knode);
-    delete prevChild;
+//    delete prevChild;
     del(kptr);
     nodeReplaceKidN(old, newNode, idx, splits);
 }
@@ -76,7 +88,7 @@ BNode* BTree::nodeDelete(BNode* par,uint16_t idx,std::vector<uint8_t >&key){
     uint64_t kptr = par->getPtr(idx);
     auto prevChild = get(kptr);
     auto updated = treeDelete(prevChild, key);
-    delete prevChild;
+//    delete prevChild;
     if(updated == nullptr){
         return nullptr;
     }
@@ -110,6 +122,8 @@ BNode* BTree::nodeDelete(BNode* par,uint16_t idx,std::vector<uint8_t >&key){
             else{
                 nodeReplaceKidN(par, newNode, idx, {updated});
             }
+        default:
+            assert(false);
     }
     return newNode;
 }
@@ -150,7 +164,7 @@ bool BTree::Delete(std::vector<uint8_t> & key) {
         return false;
     auto rootNode = get(root);
     auto updatedRoot = treeDelete(rootNode, key);
-    delete rootNode;
+//    delete rootNode;
     if(updatedRoot==nullptr)
         return false;
     del(root);
@@ -234,3 +248,21 @@ void nodeMerge(BNode* merged, BNode* left, BNode* right){
     delete right;
 }
 
+uint64_t BTree::insert(BNode * node) {
+    uint64_t ret = memory->insert(node->getData(), BTREE_PAGE_SIZE);
+    return ret;
+}
+
+void BTree::del(uint64_t ptr) {
+    memory->del(ptr);
+}
+
+BNode* BTree::get(uint64_t ptr) {
+    auto ret = new BNode(memory->get(ptr));
+    return ret;
+}
+
+
+
+
+#pragma clang diagnostic pop

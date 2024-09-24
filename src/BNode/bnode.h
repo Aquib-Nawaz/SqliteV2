@@ -23,12 +23,13 @@ enum BTreeNodeType {
 
 class BNode {
     uint64_t btype, nkeys;
-    uint8_t *data;
     static uint16_t offsetPos(uint16_t);
-
+    uint8_t *data;
 public:
     explicit BNode(uint8_t);
     BNode(uint16_t , uint16_t);
+    BNode(uint8_t *);
+    uint8_t* getData();
     uint16_t bType() const;
     uint16_t nKeys() const;
     void _setHeader(uint16_t,uint16_t);

@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(src/DataConversion)
 add_subdirectory(src/BNode)
 add_subdirectory(src/BTree)
+add_subdirectory(src/DBMemory)
+
 enable_testing()
 add_library(SqliteV2_compiler_flags INTERFACE)
 target_compile_features(SqliteV2_compiler_flags INTERFACE cxx_std_11)
@@ -19,4 +21,5 @@ target_compile_options(SqliteV2_compiler_flags INTERFACE
 )
 add_subdirectory(test/DataConversion)
 add_subdirectory(test/BNode)
+add_subdirectory(test/BTree)
 

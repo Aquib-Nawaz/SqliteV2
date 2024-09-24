@@ -10,6 +10,12 @@ BNode::BNode(uint8_t nm) {
     data = new uint8_t[BTREE_PAGE_SIZE*nm];
 }
 
+BNode::BNode(uint8_t * _data){
+    data = _data;
+    btype = littleEndianByteToInt16(data);
+    nkeys = littleEndianByteToInt16(data+2);
+}
+
 BNode::BNode( uint16_t btype, uint16_t nkeys) {
     data = new uint8_t[BTREE_PAGE_SIZE];
     _setHeader(btype, nkeys);
@@ -157,7 +163,7 @@ void BNode::leafInsert( BNode* oldNode, uint16_t idx, std::vector<uint8_t>&key,
 }
 
 void BNode::shrink(uint16_t ns) {
-    uint8_t *newData = new uint8_t[ns*BTREE_PAGE_SIZE];
+    auto *newData = new uint8_t[ns*BTREE_PAGE_SIZE];
     memcpy(newData, data, ns*BTREE_PAGE_SIZE);
     delete[] data;
     data = newData;
@@ -169,6 +175,13 @@ void BNode::leafDelete(BNode* oldNode, uint16_t idx) {
     nodeAppendRange(oldNode, idx, idx+1, oldNode->nKeys() - idx - 1);
 }
 
+
+uint8_t* BNode::getData() {
+    assert(nBytes() <= BTREE_PAGE_SIZE);
+    auto ret = new uint8_t[BTREE_PAGE_SIZE];
+    memcpy(ret, data, nBytes());
+    return ret;
+}
 BNode::~BNode() {
     delete[] data;
 }

@@ -13,10 +13,18 @@
 #define BTREE_MAX_KEY_SIZE 1000
 #define BTREE_MAX_VAL_SIZE 3000
 
+#include "dbmemory.h"
 
 class BTree {
     uint64_t root;
+    BNode * get(uint64_t);
+    void del(uint64_t);
+    uint64_t insert(BNode*);
+    DBMemory * memory;
     public:
+        BTree();
+        ~BTree();
+
         void Insert(std::vector<uint8_t >&, std::vector<uint8_t >&);
         bool Delete(std::vector<uint8_t >&);
         void nodeReplaceKidN(
