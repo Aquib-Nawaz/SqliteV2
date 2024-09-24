@@ -4,6 +4,7 @@
 
 #include <cstdio>
 #include "bnode.h"
+#include <string>
 #include "../minunit.h"
 using namespace std;
 
@@ -88,14 +89,36 @@ static const char* leafInsertTest() {
         data[0] = i;
         bnode.nodeAppendKV(i-1, data, v);
     }
-    auto _data = new uint8_t [BTREE_PAGE_SIZE];
-    BNode newNode(_data);
+    BNode newNode(1);
     data[0]=5;
     newNode.leafInsert(&bnode, 5, data, v);
     mu_assert("Size Match", newNode.nKeys() == 10);
     for(int i=0;i<10;i++){
         data[0] = i;
         mu_assert("key mismatch", newNode.getKey(i) == data);
+    }
+    return nullptr;
+}
+
+static const char * leafDeleteTest(){
+    BNode bnode(BTREE_INTERIOR, 9);
+    std::vector<uint8_t >data(1),v;
+    for(uint8_t i=0;i<9;i++){
+        data[0] = i;
+        bnode.nodeAppendKV(i, data, v);
+    }
+    BNode newNode(1);
+    newNode.leafDelete(&bnode, 5);
+    mu_assert("Size Match", newNode.nKeys() == 8);
+    for(int i=0;i<5;i++){
+        data[0] = i;
+        std::string err = "Key Mismatch " + to_string(i);
+        mu_assert(err.c_str(), newNode.getKey(i) == data);
+    }
+    for(int i=6;i<9;i++){
+        data[0] = i;
+        std::string err = "Key Mismatch " + to_string(i);
+        mu_assert(err.c_str(), newNode.getKey(i-1) == data);
     }
     return nullptr;
 }
@@ -106,6 +129,7 @@ static const char* all_tests(){
     mu_run_test(nodeAppendKVLeafTest);
     mu_run_test(nodeLookUpLETest);
     mu_run_test(leafInsertTest);
+    mu_run_test(leafDeleteTest);
     return nullptr;
 }
 

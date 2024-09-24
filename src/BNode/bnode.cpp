@@ -6,8 +6,8 @@
 #include <cassert>
 #include "../DataConversion/convertor.h"
 
-BNode::BNode(uint8_t *bytes) {
-    data = bytes;
+BNode::BNode(uint8_t nm) {
+    data = new uint8_t[BTREE_PAGE_SIZE*nm];
 }
 
 BNode::BNode( uint16_t btype, uint16_t nkeys) {
@@ -166,7 +166,7 @@ void BNode::shrink(uint16_t ns) {
 void BNode::leafDelete(BNode* oldNode, uint16_t idx) {
     _setHeader(BTREE_LEAF, oldNode->nKeys() - 1);
     nodeAppendRange(oldNode, 0, 0, idx);
-    nodeAppendRange(oldNode, idx+1, idx+1, oldNode->nKeys() - idx - 1);
+    nodeAppendRange(oldNode, idx, idx+1, oldNode->nKeys() - idx - 1);
 }
 
 BNode::~BNode() {

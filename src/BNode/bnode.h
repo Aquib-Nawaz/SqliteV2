@@ -27,7 +27,7 @@ class BNode {
     static uint16_t offsetPos(uint16_t);
 
 public:
-    BNode(uint8_t []);
+    explicit BNode(uint8_t);
     BNode(uint16_t , uint16_t);
     uint16_t bType() const;
     uint16_t nKeys() const;
