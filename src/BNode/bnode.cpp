@@ -15,14 +15,6 @@ BNode::BNode( uint16_t btype, uint16_t nkeys) {
     _setHeader(btype, nkeys);
 }
 
-uint16_t BNode::_btype() {
-    return littleEndianByteToInt16(data);
-}
-
-uint16_t BNode::_nkeys() {
-    return littleEndianByteToInt16(data + 2);
-}
-
 uint16_t BNode::bType() const {
     return btype;
 }
@@ -148,13 +140,20 @@ void BNode::nodeAppendRange(BNode* oldNode,  uint16_t destStart, uint16_t start,
     for (uint16_t i = 1; i <= num; ++i) {
         setOffset(destStart+i, oldNode->getOffset(start+i) + offSetOffSet);
     }
+    if(bType() == BTREE_INTERIOR) {
+        for (uint16_t i = 0; i < num; ++i) {
+            setPtr(destStart+i, oldNode->getPtr(start+i));
+        }
+    }
 }
 
 void BNode::leafInsert( BNode* oldNode, uint16_t idx, std::vector<uint8_t>&key,
                         std::vector<uint8_t>&val) {
+    bool skipOriginalKey = (key == oldNode->getKey(idx));
+    _setHeader(BTREE_LEAF, oldNode->nKeys() + 1 - skipOriginalKey);
     nodeAppendRange(oldNode, 0, 0, idx);
     nodeAppendKV(idx, key, val);
-    nodeAppendRange(oldNode, idx+1, idx, oldNode->nKeys()-idx);
+    nodeAppendRange(oldNode, idx+1, idx + skipOriginalKey, oldNode->nKeys() - idx - skipOriginalKey);
 }
 
 void BNode::shrink(uint16_t ns) {

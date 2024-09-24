@@ -88,7 +88,8 @@ static const char* leafInsertTest() {
         data[0] = i;
         bnode.nodeAppendKV(i-1, data, v);
     }
-    BNode newNode(BTREE_INTERIOR, 10);
+    auto _data = new uint8_t [BTREE_PAGE_SIZE];
+    BNode newNode(_data);
     data[0]=5;
     newNode.leafInsert(&bnode, 5, data, v);
     mu_assert("Size Match", newNode.nKeys() == 10);

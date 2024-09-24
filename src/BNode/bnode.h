@@ -14,8 +14,6 @@
 #define VLEN_NUM_BYTES 2
 #define POINTER_ARRAY_ELEMENT_SIZE 8
 #define OFFSET_ARRAY_ELEMENT_SIZE 2
-#define BTREE_MAX_KEY_SIZE 1000
-#define BTREE_MAX_VAL_SIZE 3000
 
 enum BTreeNodeType {
     BTREE_LEAF = 0,
@@ -27,8 +25,7 @@ class BNode {
     uint64_t btype, nkeys;
     uint8_t *data;
     static uint16_t offsetPos(uint16_t);
-    uint16_t _btype();
-    uint16_t _nkeys();
+
 public:
     BNode(uint8_t []);
     BNode(uint16_t , uint16_t);
