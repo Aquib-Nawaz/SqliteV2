@@ -17,9 +17,6 @@
 class BTree {
     uint64_t root;
     public:
-        BNode * get(uint64_t);
-        void del(uint64_t);
-        uint64_t insert(BNode*);
         void Insert(std::vector<uint8_t >&, std::vector<uint8_t >&);
         bool Delete(std::vector<uint8_t >&);
         void nodeReplaceKidN(
