@@ -19,6 +19,7 @@ uint64_t DBMemory::insert(uint8_t  *val, int length) {
     auto ret = new uint8_t[length];
     memcpy(ret, val, length);
     memory[++count] = ret;
+    delete val;
     return count;
 }
 

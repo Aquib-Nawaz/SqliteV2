@@ -27,13 +27,15 @@ class BTree {
 
         void Insert(std::vector<uint8_t >&, std::vector<uint8_t >&);
         bool Delete(std::vector<uint8_t >&);
+        std::vector<uint8_t > Get(std::vector<uint8_t >&);
         void nodeReplaceKidN(
             BNode* , BNode*, uint16_t ,
             std::vector<BNode*>);
         BNode* treeInsert(BNode* , std::vector<uint8_t >&, std::vector<uint8_t>& );
+        BNode* treeDelete(BNode* ,std::vector<uint8_t >& );
+        std::vector<uint8_t > treeGet(BNode* ,std::vector<uint8_t >& );
         void nodeInsert(BNode* ,BNode*,uint16_t , std::vector<uint8_t >&, std::vector<uint8_t>& );
         std::pair<int,BNode*> shouldMerge(BNode*, uint16_t , BNode*);
-        BNode* treeDelete(BNode* ,std::vector<uint8_t >& );
         BNode* nodeDelete(BNode*,uint16_t ,std::vector<uint8_t >&);
 };
 std::vector<BNode*> nodeSplit3(BNode* );

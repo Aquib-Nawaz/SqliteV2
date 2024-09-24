@@ -71,6 +71,21 @@ BNode* BTree::treeInsert(BNode* oldNode, std::vector<uint8_t>& key, std::vector<
     return newNode;
 }
 
+std::vector<uint8_t >BTree::treeGet(BNode* node, std::vector<uint8_t >&key){
+    uint16_t idx = node->nodeLookUpLE(key);
+    std::vector<uint8_t> ret;
+    if(node->bType()== BTREE_INTERIOR) {
+        uint64_t ptr = node->getPtr(idx);
+        ret = treeGet(get(ptr), key);
+    }
+    else if(node->bType() == BTREE_LEAF)
+        ret = idx!=node->nKeys() && node->getKey(idx) == key ? node->getVal(idx) : std::vector<uint8_t>();
+    else
+        assert(false);
+    delete node;
+    return ret;
+}
+
 void BTree::nodeInsert(BNode* old,BNode* newNode,uint16_t idx,
                          std::vector<uint8_t >& key, std::vector<uint8_t>& value){
     uint64_t kptr = old->getPtr(idx);
@@ -170,6 +185,13 @@ bool BTree::Delete(std::vector<uint8_t> & key) {
     return true;
 }
 
+std::vector<uint8_t> BTree:: Get(std::vector<uint8_t> & key) {
+    if(root==0)
+        return {};
+    auto rootNode = get(root);
+    return treeGet(rootNode, key);
+}
+
 void nodeSplit2(BNode* left, BNode* right, BNode* old){
     uint16_t offSize = OFFSET_ARRAY_ELEMENT_SIZE + ( old->bType()==BTREE_INTERIOR?
             POINTER_ARRAY_ELEMENT_SIZE:0);
@@ -249,6 +271,7 @@ void nodeMerge(BNode* merged, BNode* left, BNode* right){
 
 uint64_t BTree::insert(BNode * node) {
     uint64_t ret = memory->insert(node->getData(), BTREE_PAGE_SIZE);
+    delete node;
     return ret;
 }
 
