@@ -11,7 +11,6 @@ BTree::BTree(){
 }
 
 BTree::~BTree(){
-    del(root);
     delete memory;
 }
 
@@ -67,7 +66,6 @@ BNode* BTree::treeInsert(BNode* oldNode, std::vector<uint8_t>& key, std::vector<
         default:
             assert(false);
     }
-//    delete oldNode;
     return newNode;
 }
 

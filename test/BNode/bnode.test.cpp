@@ -91,7 +91,7 @@ static const char* leafInsertTest() {
     }
     BNode newNode(1);
     data[0]=5;
-    newNode.leafInsert(&bnode, 5, data, v);
+    newNode.leafInsert(&bnode, 4, data, v);
     mu_assert("Size Match", newNode.nKeys() == 10);
     for(int i=0;i<10;i++){
         data[0] = i;

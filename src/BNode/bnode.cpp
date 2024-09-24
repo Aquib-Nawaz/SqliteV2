@@ -87,8 +87,9 @@ std::vector<uint8_t> BNode::getVal(uint16_t idx) {
     uint16_t keyLen = littleEndianByteToInt16(data + pos);
     uint16_t valueLen = littleEndianByteToInt16(data + pos+2);
     std::vector<uint8_t> ret(valueLen);
-    memcpy(ret.data(), data + pos + KLEN_NUM_BYTES +
-        VLEN_NUM_BYTES+keyLen, valueLen);
+
+    memcpy(&ret[0], data + pos + KLEN_NUM_BYTES +
+        VLEN_NUM_BYTES+keyLen, valueLen*sizeof(ret[0]));
     return ret;
 }
 
@@ -102,18 +103,18 @@ uint16_t BNode::nodeLookUpLE(std::vector<uint8_t >& key){
     while (left < right) {
         uint16_t mid = (left + right) / 2;
         std::vector<uint8_t > k = getKey(mid);
-        if (key <= k) {
-            right = mid;
-        } else {
+        if (key >= k) {
             left = mid+1;
+        } else {
+            right = mid;
         }
     }
     if(left < nkeys) {
         std::vector<uint8_t > k = getKey(left);
-        if(key < k)
+        if(k<=key)
             left++;
     }
-    return left;
+    return left-1;
 }
 
 void BNode::modifyData(uint16_t pos, void * srcData, uint16_t len){
@@ -156,11 +157,11 @@ void BNode::nodeAppendRange(BNode* oldNode,  uint16_t destStart, uint16_t start,
 
 void BNode::leafInsert( BNode* oldNode, uint16_t idx, std::vector<uint8_t>&key,
                         std::vector<uint8_t>&val) {
-    bool skipOriginalKey = (key == oldNode->getKey(idx));
+    bool skipOriginalKey = (idx<nkeys && key == oldNode->getKey(idx));
     _setHeader(BTREE_LEAF, oldNode->nKeys() + 1 - skipOriginalKey);
-    nodeAppendRange(oldNode, 0, 0, idx);
-    nodeAppendKV(idx, key, val);
-    nodeAppendRange(oldNode, idx+1, idx + skipOriginalKey, oldNode->nKeys() - idx - skipOriginalKey);
+    nodeAppendRange(oldNode, 0, 0, idx+1-skipOriginalKey);
+    nodeAppendKV(idx+1-skipOriginalKey, key, val);
+    nodeAppendRange(oldNode, idx+2-skipOriginalKey, idx + 1, oldNode->nKeys() - idx - 1);
 }
 
 void BNode::shrink(uint16_t ns) {

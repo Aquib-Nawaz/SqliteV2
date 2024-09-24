@@ -12,6 +12,7 @@ uint8_t * DBMemory::get(uint64_t key) {
 
 void DBMemory::del(uint64_t key) {
     assert(memory.count(key));
+    delete memory[key];
     memory.erase(key);
 }
 
@@ -28,9 +29,9 @@ DBMemory::DBMemory() {
 }
 
 DBMemory::~DBMemory() {
-    for(auto it : memory){
-        delete it.second;
-    }
+//    for(auto it : memory){
+//        delete it.second;
+//    }
 }
 
 

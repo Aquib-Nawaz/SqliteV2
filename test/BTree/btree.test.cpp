@@ -58,12 +58,11 @@ static const char * nodeSplit3Test_2(){
 }
 
 static const char * insertAndGetTest_1(){
-    auto tree = new BTree();
+    BTree tree;
     std::vector<uint8_t>key(1), val(1);
     key[0]=10,val[0]=20;
-    tree->Insert(key, val);
-    mu_assert_iter(10, "key mismatch", tree->Get(key) == val);
-    delete tree;
+    tree.Insert(key, val);
+    mu_assert_iter(10, "key mismatch", tree.Get(key) == val);
     return nullptr;
 }
 
@@ -77,11 +76,24 @@ static const char * insertAndGetTest_KeyNotFound(){
     return nullptr;
 }
 
+static const char * insertAndGetTest_2Level(){
+    BTree tree;
+    std::vector<uint8_t >key(1000,0), val(3000,0);
+    key[0]=5, val[0]=8;
+    tree.Insert(key,val);
+    key[0]=10, val[0]=12;
+    tree.Insert(key,val);
+    key[0]=10, val[0]=12;
+    mu_assert_iter(5, "Value Mismatch", tree.Get(key) == val);
+    return nullptr;
+}
+
 static const char* all_tests(){
     mu_run_test(nodeSplit3Test_1);
     mu_run_test(nodeSplit3Test_2);
     mu_run_test(insertAndGetTest_1);
     mu_run_test(insertAndGetTest_KeyNotFound);
+    mu_run_test(insertAndGetTest_2Level);
     return nullptr;
 }
 
