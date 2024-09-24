@@ -8,6 +8,7 @@
 
 #include <cstdint>
 #include "bnode.h"
+#include <utility>
 
 #define BTREE_MAX_KEY_SIZE 1000
 #define BTREE_MAX_VAL_SIZE 3000
@@ -26,11 +27,14 @@ class BTree {
             std::vector<BNode*>);
         BNode* treeInsert(BNode* , std::vector<uint8_t >&, std::vector<uint8_t>& );
         void nodeInsert(BNode* ,BNode*,uint16_t , std::vector<uint8_t >&, std::vector<uint8_t>& );
+        std::pair<int,BNode*> shouldMerge(BNode*, uint16_t , BNode*);
+        BNode* treeDelete(BNode* ,std::vector<uint8_t >& );
+        BNode* nodeDelete(BNode*,uint16_t ,std::vector<uint8_t >&);
 };
 std::vector<BNode*> nodeSplit3(BNode* );
 void nodeSplit2(BNode* , BNode* , BNode* );
 void checkLimit(std::vector<uint8_t >&,std::vector<uint8_t >&);
-
+void nodeMerge(BNode*,BNode*,BNode*);
 
 
 #endif //SQLITEV2_BTREE_H

@@ -47,6 +47,7 @@ public:
     void nodeAppendKV( uint16_t , std::vector<uint8_t>&, std::vector<uint8_t>&, uint64_t ptr=0);
     void leafInsert( BNode* , uint16_t , std::vector<uint8_t>&,
                     std::vector<uint8_t>&);
+    void leafDelete(BNode*, uint16_t );
     ~BNode();
 };
 

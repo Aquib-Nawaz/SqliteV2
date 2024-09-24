@@ -163,6 +163,12 @@ void BNode::shrink(uint16_t ns) {
     data = newData;
 }
 
+void BNode::leafDelete(BNode* oldNode, uint16_t idx) {
+    _setHeader(BTREE_LEAF, oldNode->nKeys() - 1);
+    nodeAppendRange(oldNode, 0, 0, idx);
+    nodeAppendRange(oldNode, idx+1, idx+1, oldNode->nKeys() - idx - 1);
+}
+
 BNode::~BNode() {
     delete[] data;
 }
