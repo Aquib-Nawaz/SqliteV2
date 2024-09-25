@@ -83,8 +83,21 @@ static const char * insertAndGetTest_2Level(){
     tree.Insert(key,val);
     key[0]=10, val[0]=12;
     tree.Insert(key,val);
-    key[0]=10, val[0]=12;
+    mu_assert_iter(10, "Value Mismatch", tree.Get(key) == val);
+    key[0]=5, val[0]=8;
     mu_assert_iter(5, "Value Mismatch", tree.Get(key) == val);
+    return nullptr;
+}
+
+static const char * insertAndGetTest_3Level(){
+    BTree tree;
+    std::vector<uint8_t >key(1000,0), val(3000,0);
+    for(int i=1;i<=5;i++){
+        key[0]=i, val[0]=i+10;
+        tree.Insert(key,val);
+        mu_assert_iter(i, "Value Mismatch", tree.Get(key) == val);
+    }
+//    mu_assert_iter(5, "Value Mismatch", tree.Get(key) == val);
     return nullptr;
 }
 
@@ -94,6 +107,7 @@ static const char* all_tests(){
     mu_run_test(insertAndGetTest_1);
     mu_run_test(insertAndGetTest_KeyNotFound);
     mu_run_test(insertAndGetTest_2Level);
+    mu_run_test(insertAndGetTest_3Level);
     return nullptr;
 }
 

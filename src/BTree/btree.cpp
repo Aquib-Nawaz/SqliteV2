@@ -90,7 +90,7 @@ void BTree::nodeInsert(BNode* old,BNode* newNode,uint16_t idx,
     auto prevChild = get(kptr);
     auto knode = treeInsert( prevChild, key, value);
     auto splits = nodeSplit3(knode);
-//    delete prevChild;
+    delete prevChild;
     del(kptr);
     nodeReplaceKidN(old, newNode, idx, splits);
 }
@@ -154,6 +154,7 @@ void BTree::Insert(std::vector<uint8_t> &key, std::vector<uint8_t> & val) {
     auto node = treeInsert(rootNode, key, val);
     std::vector<BNode*> splits = nodeSplit3(node);
     del(root);
+    delete rootNode;
     if(splits.size()>1){
         rootNode = new BNode(1);
         rootNode->_setHeader(BTREE_INTERIOR, splits.size());
