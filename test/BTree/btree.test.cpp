@@ -95,9 +95,11 @@ static const char * insertAndGetTest_3Level(){
     for(int i=1;i<=5;i++){
         key[0]=i, val[0]=i+10;
         tree.Insert(key,val);
-        mu_assert_iter(i, "Value Mismatch", tree.Get(key) == val);
+        for(int j=1;j<=i;j++){
+            key[0]=j, val[0]=j+10;
+            mu_assert_iter(i, "Value Mismatch", tree.Get(key) == val);
+        }
     }
-//    mu_assert_iter(5, "Value Mismatch", tree.Get(key) == val);
     return nullptr;
 }
 
