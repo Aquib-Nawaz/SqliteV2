@@ -22,7 +22,7 @@ class BTree {
     uint64_t insert(BNode*);
     DBMemory * memory;
     public:
-        BTree();
+        explicit BTree(DBMemory*);
         ~BTree();
 
         void Insert(std::vector<uint8_t >&, std::vector<uint8_t >&);

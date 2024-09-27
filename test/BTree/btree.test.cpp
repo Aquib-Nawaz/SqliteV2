@@ -5,6 +5,7 @@
 #include <cstdio>
 #include "btree.h"
 #include "../minunit.h"
+#include "hashmapdb.h"
 using namespace std;
 
 int tests_run = 0;
@@ -58,26 +59,31 @@ static const char * nodeSplit3Test_2(){
 }
 
 static const char * insertAndGetTest_1(){
-    BTree tree;
+    DBMemory *memory = new HashMapDBMemory();
+    BTree tree(memory);
     std::vector<uint8_t>key(1), val(1);
     key[0]=10,val[0]=20;
     tree.Insert(key, val);
     mu_assert_iter(10, "key mismatch", tree.Get(key) == val);
+    delete memory;
     return nullptr;
 }
 
 static const char * insertAndGetTest_KeyNotFound(){
-    BTree tree;
+    DBMemory *memory = new HashMapDBMemory();
+    BTree tree(memory);
     std::vector<uint8_t>key(1), val(1);
     key[0]=10,val[0]=20;
     tree.Insert(key, val);
     key[0]=1;
     mu_assert_iter(10, "key mismatch", tree.Get(key).empty());
+    delete memory;
     return nullptr;
 }
 
 static const char * insertAndGetTest_2Level(){
-    BTree tree;
+    DBMemory *memory = new HashMapDBMemory();
+    BTree tree(memory);
     std::vector<uint8_t >key(1000,0), val(3000,0);
     key[0]=5, val[0]=8;
     tree.Insert(key,val);
@@ -86,11 +92,13 @@ static const char * insertAndGetTest_2Level(){
     mu_assert_iter(10, "Value Mismatch", tree.Get(key) == val);
     key[0]=5, val[0]=8;
     mu_assert_iter(5, "Value Mismatch", tree.Get(key) == val);
+    delete memory;
     return nullptr;
 }
 
 static const char * insertAndGetTest_3Level(){
-    BTree tree;
+    DBMemory *memory = new HashMapDBMemory();
+    BTree tree(memory);
     std::vector<uint8_t >key(1000,0), val(3000,0);
     for(int i=1;i<=5;i++){
         key[0]=i, val[0]=i+10;
@@ -100,8 +108,34 @@ static const char * insertAndGetTest_3Level(){
             mu_assert_iter(i, "Value Mismatch", tree.Get(key) == val);
         }
     }
+    delete memory;
     return nullptr;
 }
+
+static const char * deleteLevel3_Test(){
+    DBMemory *memory = new HashMapDBMemory();
+    BTree tree(memory);
+    std::vector<uint8_t >key(1,0), val(1,0);
+    for(int i=1;i<=10;i++){
+        key[0]=i, val[0]=i+10;
+        tree.Insert(key,val);
+    }
+    for(int i=3;i<=7;i+=2) {
+        key[0] = i;
+        tree.Delete(key);
+        mu_assert_iter(i, "Value Mismatch", tree.Get(key).empty());
+    }
+    for(int i=1;i<=10;i++){
+        key[0]=i, val[0]=i+10;
+        if(i==3 || i==5 || i==7)
+            continue;
+        mu_assert_iter(i, "Value Mismatch", tree.Get(key) == val);
+    }
+    delete memory;
+
+    return nullptr;
+}
+
 
 static const char* all_tests(){
     mu_run_test(nodeSplit3Test_1);
@@ -110,6 +144,7 @@ static const char* all_tests(){
     mu_run_test(insertAndGetTest_KeyNotFound);
     mu_run_test(insertAndGetTest_2Level);
     mu_run_test(insertAndGetTest_3Level);
+    mu_run_test(deleteLevel3_Test);
     return nullptr;
 }
 

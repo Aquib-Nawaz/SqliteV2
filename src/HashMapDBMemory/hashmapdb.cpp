@@ -2,35 +2,33 @@
 // Created by Aquib Nawaz on 24/09/24.
 //
 
-#include "dbmemory.h"
 #include <cassert>
+#include "hashmapdb.h"
+#include <cstring>
 
-uint8_t * DBMemory::get(uint64_t key) {
+uint8_t * HashMapDBMemory::get(uint64_t key) {
     assert(memory.count(key));
     auto ret = new uint8_t [4096];
     memcpy(ret, memory[key], 4096);
     return ret;
 }
 
-void DBMemory::del(uint64_t key) {
+void HashMapDBMemory::del(uint64_t key) {
     assert(memory.count(key));
     delete memory[key];
     memory.erase(key);
 }
 
-uint64_t DBMemory::insert(uint8_t  *val, int length) {
-    auto ret = new uint8_t[length];
-    memcpy(ret, val, length);
-    memory[++count] = ret;
-    delete val;
+uint64_t HashMapDBMemory::insert(uint8_t  *val, int length) {
+    memory[++count] = val;
     return count;
 }
 
-DBMemory::DBMemory() {
+HashMapDBMemory::HashMapDBMemory() {
     count = 0;
 }
 
-DBMemory::~DBMemory() {
+HashMapDBMemory::~HashMapDBMemory() {
     for(auto it : memory){
         delete it.second;
     }

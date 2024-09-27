@@ -10,6 +10,10 @@ BNode::BNode(uint8_t nm) {
     data = new uint8_t[BTREE_PAGE_SIZE*nm];
 }
 
+void BNode::resetData(){
+    data = nullptr;
+}
+
 BNode::BNode(uint8_t * _data){
     data = _data;
     btype = littleEndianByteToInt16(data);
@@ -157,7 +161,7 @@ void BNode::nodeAppendRange(BNode* oldNode,  uint16_t destStart, uint16_t start,
 
 void BNode::leafInsert( BNode* oldNode, uint16_t idx, std::vector<uint8_t>&key,
                         std::vector<uint8_t>&val) {
-    bool skipOriginalKey = (idx<nkeys && key == oldNode->getKey(idx));
+    bool skipOriginalKey = ( key == oldNode->getKey(idx));
     _setHeader(BTREE_LEAF, oldNode->nKeys() + 1 - skipOriginalKey);
     nodeAppendRange(oldNode, 0, 0, idx+1-skipOriginalKey);
     nodeAppendKV(idx+1-skipOriginalKey, key, val);
@@ -180,9 +184,7 @@ void BNode::leafDelete(BNode* oldNode, uint16_t idx) {
 
 uint8_t* BNode::getData() {
     assert(nBytes() <= BTREE_PAGE_SIZE);
-    auto ret = new uint8_t[BTREE_PAGE_SIZE];
-    memcpy(ret, data, nBytes());
-    return ret;
+    return data;
 }
 BNode::~BNode() {
     delete[] data;

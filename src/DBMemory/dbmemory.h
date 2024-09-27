@@ -8,14 +8,13 @@
 #include <unordered_map>
 
 class DBMemory {
-    std::unordered_map<uint64_t , uint8_t *> memory;
-    uint64_t count;
+
     public:
-    DBMemory();
-    ~DBMemory();
-    uint8_t * get(uint64_t);
-    void del(uint64_t);
-    uint64_t insert(uint8_t *,int);
+
+    virtual uint8_t * get(uint64_t)=0;
+    virtual void del(uint64_t)=0;
+    virtual uint64_t insert(uint8_t *,int)=0;
+    virtual ~DBMemory() = default;
 };
 
 

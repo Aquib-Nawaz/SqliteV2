@@ -5,14 +5,12 @@
 #include "btree.h"
 #include <cassert>
 
-BTree::BTree(){
+BTree::BTree(DBMemory * _memory){
     root = 0;
-    memory = new DBMemory();
+    memory = _memory;
 }
 
-BTree::~BTree(){
-    delete memory;
-}
+BTree::~BTree()= default;
 
 void BTree::nodeReplaceKidN( BNode* oldNode, BNode* newNode, uint16_t idx,
         std::vector<BNode*> kids){
@@ -26,7 +24,6 @@ void BTree::nodeReplaceKidN( BNode* oldNode, BNode* newNode, uint16_t idx,
     for(uint16_t i=0;i<(uint16_t)kids.size();i++){
         key = kids[i]->getKey(0);
         newNode->nodeAppendKV(idx+i,key, v, insert(kids[i]));
-//        delete kids[i];
     }
 
     newNode->nodeAppendRange(oldNode, idx+inc, idx+1, oldNode->nKeys()-(idx+1));
@@ -172,11 +169,11 @@ void BTree::Insert(std::vector<uint8_t> &key, std::vector<uint8_t> & val) {
 }
 
 bool BTree::Delete(std::vector<uint8_t> & key) {
-    if(root==0)
+    if(root==0 || key.empty())
         return false;
     auto rootNode = get(root);
     auto updatedRoot = treeDelete(rootNode, key);
-//    delete rootNode;
+    delete rootNode;
     if(updatedRoot==nullptr)
         return false;
     del(root);
@@ -233,7 +230,7 @@ std::vector<BNode*> nodeSplit3(BNode* old){
 }
 
 void checkLimit(std::vector<uint8_t >&key, std::vector<uint8_t >&val){
-    assert(key.size()<=BTREE_MAX_KEY_SIZE && val.size()<=BTREE_MAX_VAL_SIZE);
+    assert(key.size()<=BTREE_MAX_KEY_SIZE && val.size()<=BTREE_MAX_VAL_SIZE && !key.empty());
 }
 
 std::pair<int, BNode*> BTree::shouldMerge(BNode* par, uint16_t idx, BNode* updated){
@@ -263,13 +260,14 @@ void nodeMerge(BNode* merged, BNode* left, BNode* right){
     assert(left->bType()==right->bType());
     merged->_setHeader(left->bType(), left->nKeys()+right->nKeys());
     merged->nodeAppendRange(left, 0, 0, left->nKeys());
-    merged->nodeAppendRange(right, 0, 0, right->nKeys());
+    merged->nodeAppendRange(right, left->nKeys(), 0, right->nKeys());
     delete left;
     delete right;
 }
 
 uint64_t BTree::insert(BNode * node) {
     uint64_t ret = memory->insert(node->getData(), BTREE_PAGE_SIZE);
+    node->resetData();
     delete node;
     return ret;
 }
