@@ -10,4 +10,4 @@ target_link_libraries(HashMapDBMemory PRIVATE
 )
 
 target_link_libraries(HashMapDBMemory PUBLIC
-        DBMemory)
+        BTree)

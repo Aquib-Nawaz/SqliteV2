@@ -12,7 +12,6 @@ int tests_run = 0;
 static const char * PageDBInititalizationTest() {
     const char * fileName = "test.db";
     DiskPageDBMemory db(fileName);
-    mu_assert("Root should be 0",db.getRoot() == 0);
     return nullptr;
 }
 static const char* all_tests(){

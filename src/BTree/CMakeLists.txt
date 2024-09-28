@@ -6,6 +6,7 @@ target_include_directories(BTree
 )
 
 target_link_libraries(BTree PRIVATE
-        BNode
-        DBMemory
         SqliteV2_compiler_flags)
+
+target_link_libraries(BTree PUBLIC
+        BNode)

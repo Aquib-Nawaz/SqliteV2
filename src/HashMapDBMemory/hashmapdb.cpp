@@ -6,11 +6,11 @@
 #include "hashmapdb.h"
 #include <cstring>
 
-uint8_t * HashMapDBMemory::get(uint64_t key) {
+BNode * HashMapDBMemory::get(uint64_t key) {
     assert(memory.count(key));
     auto ret = new uint8_t [4096];
     memcpy(ret, memory[key], 4096);
-    return ret;
+    return new BNode(ret);
 }
 
 void HashMapDBMemory::del(uint64_t key) {
@@ -19,8 +19,10 @@ void HashMapDBMemory::del(uint64_t key) {
     memory.erase(key);
 }
 
-uint64_t HashMapDBMemory::insert(uint8_t  *val, int length) {
-    memory[++count] = val;
+uint64_t HashMapDBMemory::insert(BNode  *val) {
+    memory[++count] = val->getData();
+    val->resetData();
+    delete val;
     return count;
 }
 

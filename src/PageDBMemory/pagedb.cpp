@@ -46,6 +46,7 @@ DiskPageDBMemory::DiskPageDBMemory(const char *_path) {
         mmapChunk.size = PAGE_SIZE;
     }
     else{
+        root = littleEndianByteToInt64(map+10);
         mmapChunk.size = littleEndianByteToInt64(map+18);
     }
     if(memcmp(DB_VERSION, map, 10) != 0){
@@ -55,12 +56,10 @@ DiskPageDBMemory::DiskPageDBMemory(const char *_path) {
     mmapChunk.chunks.emplace_back(map, st.st_size);
 }
 
-uint64_t DiskPageDBMemory::insert(uint8_t *, int) {return 0;}
-uint8_t *DiskPageDBMemory::get(uint64_t) {return nullptr;}
-
-uint64_t DiskPageDBMemory::getRoot() {return littleEndianByteToInt64(mmapChunk.chunks[0].first+10);}
-
+uint64_t DiskPageDBMemory::insert(BNode *) {return 0;}
+BNode *DiskPageDBMemory::get(uint64_t) {return nullptr;}
 void DiskPageDBMemory::del(uint64_t) {}
+
 DiskPageDBMemory::~DiskPageDBMemory() {
     OUTPUT_ERROR( munmap(mmapChunk.chunks[0].first, mmapChunk.chunks[0].second), "destructor");
     OUTPUT_ERROR( close(fd),"destructor file close");

@@ -5,13 +5,7 @@
 #include "btree.h"
 #include <cassert>
 
-BTree::BTree(DBMemory * _memory){
-    root = 0;
-    memory = _memory;
-}
-
 BTree::~BTree()= default;
-void BTree::setRoot(uint64_t _root) {root=_root;}
 void BTree::nodeReplaceKidN( BNode* oldNode, BNode* newNode, uint16_t idx,
         std::vector<BNode*> kids){
 
@@ -265,21 +259,21 @@ void nodeMerge(BNode* merged, BNode* left, BNode* right){
     delete right;
 }
 
-uint64_t BTree::insert(BNode * node) {
-    uint64_t ret = memory->insert(node->getData(), BTREE_PAGE_SIZE);
-    node->resetData();
-    delete node;
-    return ret;
-}
-
-void BTree::del(uint64_t ptr) {
-    memory->del(ptr);
-}
-
-BNode* BTree::get(uint64_t ptr) {
-    auto ret = new BNode(memory->get(ptr));
-    return ret;
-}
+//uint64_t BTree::insert(BNode * node) {
+//    uint64_t ret = memory->insert(node->getData(), BTREE_PAGE_SIZE);
+//    node->resetData();
+//    delete node;
+//    return ret;
+//}
+//
+//void BTree::del(uint64_t ptr) {
+//    memory->del(ptr);
+//}
+//
+//BNode* BTree::get(uint64_t ptr) {
+//    auto ret = new BNode(memory->get(ptr));
+//    return ret;
+//}
 
 void nodeReplace2Kid(BNode* newNode, BNode* oldNode, uint16_t idx, uint64_t ptr,
                 std::vector<uint8_t > &key){

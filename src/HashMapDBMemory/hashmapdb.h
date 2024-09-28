@@ -5,18 +5,19 @@
 #ifndef SQLITEV2_HASHMAP_H
 #define SQLITEV2_HASHMAP_H
 
-#include "dbmemory.h"
+#include "btree.h"
+#include <unordered_map>
 
-class HashMapDBMemory: public DBMemory {
+class HashMapDBMemory: public BTree {
     uint64_t count;
     std::unordered_map<uint64_t, uint8_t*> memory;
 public:
     HashMapDBMemory();
     ~HashMapDBMemory();
 
-    uint8_t * get(uint64_t);
-    void del(uint64_t);
-    uint64_t insert(uint8_t*, int);
+    BNode * get(uint64_t) override;
+    void del(uint64_t) override;
+    uint64_t insert(BNode*) override;
 };
 
 #endif //SQLITEV2_HASHMAP_H

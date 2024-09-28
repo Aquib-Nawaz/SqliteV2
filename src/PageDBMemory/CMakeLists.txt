@@ -11,4 +11,4 @@ target_link_libraries(PageDBMemory PRIVATE
 )
 
 target_link_libraries(PageDBMemory PUBLIC
-        DBMemory)
+        BTree)

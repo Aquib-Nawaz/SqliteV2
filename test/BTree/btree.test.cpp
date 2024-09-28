@@ -59,79 +59,74 @@ static const char * nodeSplit3Test_2(){
 }
 
 static const char * insertAndGetTest_1(){
-    DBMemory *memory = new HashMapDBMemory();
-    BTree tree(memory);
+    BTree *tree = new HashMapDBMemory();
     std::vector<uint8_t>key(1), val(1);
     key[0]=10,val[0]=20;
-    tree.Insert(key, val);
-    mu_assert_iter(10, "key mismatch", tree.Get(key) == val);
-    delete memory;
+    tree->Insert(key, val);
+    mu_assert_iter(10, "key mismatch", tree->Get(key) == val);
+    delete tree;
     return nullptr;
 }
 
 static const char * insertAndGetTest_KeyNotFound(){
-    DBMemory *memory = new HashMapDBMemory();
-    BTree tree(memory);
+    BTree *tree = new HashMapDBMemory();
     std::vector<uint8_t>key(1), val(1);
     key[0]=10,val[0]=20;
-    tree.Insert(key, val);
+    tree->Insert(key, val);
     key[0]=1;
-    mu_assert_iter(10, "key mismatch", tree.Get(key).empty());
-    delete memory;
+    mu_assert_iter(10, "key mismatch", tree->Get(key).empty());
+    delete tree;
     return nullptr;
 }
 
 static const char * insertAndGetTest_2Level(){
-    DBMemory *memory = new HashMapDBMemory();
-    BTree tree(memory);
+    BTree *tree = new HashMapDBMemory();
     std::vector<uint8_t >key(1000,0), val(3000,0);
     key[0]=5, val[0]=8;
-    tree.Insert(key,val);
+    tree->Insert(key,val);
     key[0]=10, val[0]=12;
-    tree.Insert(key,val);
-    mu_assert_iter(10, "Value Mismatch", tree.Get(key) == val);
+    tree->Insert(key,val);
+    mu_assert_iter(10, "Value Mismatch", tree->Get(key) == val);
     key[0]=5, val[0]=8;
-    mu_assert_iter(5, "Value Mismatch", tree.Get(key) == val);
-    delete memory;
+    mu_assert_iter(5, "Value Mismatch", tree->Get(key) == val);
+    delete tree;
     return nullptr;
 }
 
 static const char * insertAndGetTest_3Level(){
-    DBMemory *memory = new HashMapDBMemory();
-    BTree tree(memory);
+    BTree *tree = new HashMapDBMemory();
     std::vector<uint8_t >key(1000,0), val(3000,0);
     for(int i=1;i<=5;i++){
         key[0]=i, val[0]=i+10;
-        tree.Insert(key,val);
+        tree->Insert(key,val);
         for(int j=1;j<=i;j++){
             key[0]=j, val[0]=j+10;
-            mu_assert_iter(i, "Value Mismatch", tree.Get(key) == val);
+            mu_assert_iter(i, "Value Mismatch", tree->Get(key) == val);
         }
     }
-    delete memory;
+    delete tree;
     return nullptr;
 }
 
 static const char * deleteLevel3_Test(){
-    DBMemory *memory = new HashMapDBMemory();
-    BTree tree(memory);
+    BTree *tree = new HashMapDBMemory();
     std::vector<uint8_t >key(1,0), val(1,0);
     for(int i=1;i<=10;i++){
         key[0]=i, val[0]=i+10;
-        tree.Insert(key,val);
+        tree->Insert(key,val);
     }
     for(int i=3;i<=7;i+=2) {
         key[0] = i;
-        tree.Delete(key);
-        mu_assert_iter(i, "Value Mismatch", tree.Get(key).empty());
+        tree->Delete(key);
+        mu_assert_iter(i, "Value Mismatch", tree->Get(key).empty());
     }
     for(int i=1;i<=10;i++){
         key[0]=i, val[0]=i+10;
         if(i==3 || i==5 || i==7)
             continue;
-        mu_assert_iter(i, "Value Mismatch", tree.Get(key) == val);
+        mu_assert_iter(i, "Value Mismatch", tree->Get(key) == val);
     }
-    delete memory;
+    delete tree;
 
     return nullptr;
 }

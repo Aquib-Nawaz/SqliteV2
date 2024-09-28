@@ -5,7 +5,7 @@
 #ifndef SQLITEV2_PAGEDB_H
 #define SQLITEV2_PAGEDB_H
 
-#include "dbmemory.h"
+#include "btree.h"
 #include <vector>
 #include <utility>
 #define OUTPUT_ERROR(x,y) do{if((x)==-1){perror(y);exit(1);}}while(0);
@@ -17,17 +17,16 @@ struct MMapChunk{
     size_t size;
 };
 
-class DiskPageDBMemory: public DBMemory {
+class DiskPageDBMemory: public BTree {
     int fd;
     std::vector<uint8_t *> pagesToAppend;
     MMapChunk mmapChunk;
 public:
     ~DiskPageDBMemory();
-     uint8_t * get(uint64_t);
-    void del(uint64_t);
-    uint64_t insert(uint8_t *,int);
+     BNode * get(uint64_t) override;
+    void del(uint64_t) override;
+    uint64_t insert(BNode *) override;
     DiskPageDBMemory(const char* );
-    uint64_t getRoot() override;
 };
 
 
