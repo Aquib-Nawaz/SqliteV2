@@ -15,6 +15,7 @@ class DBMemory {
     virtual void del(uint64_t)=0;
     virtual uint64_t insert(uint8_t *,int)=0;
     virtual ~DBMemory() = default;
+    virtual uint64_t getRoot() {return 0;}
 };
 
 

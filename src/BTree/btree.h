@@ -24,7 +24,7 @@ class BTree {
     public:
         explicit BTree(DBMemory*);
         ~BTree();
-
+        void setRoot(uint64_t);
         void Insert(std::vector<uint8_t >&, std::vector<uint8_t >&);
         bool Delete(std::vector<uint8_t >&);
         std::vector<uint8_t > Get(std::vector<uint8_t >&);

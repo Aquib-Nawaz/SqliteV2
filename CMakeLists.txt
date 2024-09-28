@@ -8,6 +8,7 @@ add_subdirectory(src/BTree)
 add_subdirectory(src/DBMemory)
 add_subdirectory(src/HashMapDBMemory)
 add_subdirectory(src/PageDBMemory)
+add_subdirectory(src)
 enable_testing()
 add_library(SqliteV2_compiler_flags INTERFACE)
 target_compile_features(SqliteV2_compiler_flags INTERFACE cxx_std_11)
@@ -23,4 +24,5 @@ target_compile_options(SqliteV2_compiler_flags INTERFACE
 add_subdirectory(test/DataConversion)
 add_subdirectory(test/BNode)
 add_subdirectory(test/BTree)
+add_subdirectory(test/PageDBMemory)
 

@@ -11,7 +11,7 @@ BTree::BTree(DBMemory * _memory){
 }
 
 BTree::~BTree()= default;
-
+void BTree::setRoot(uint64_t _root) {root=_root;}
 void BTree::nodeReplaceKidN( BNode* oldNode, BNode* newNode, uint16_t idx,
         std::vector<BNode*> kids){
 
