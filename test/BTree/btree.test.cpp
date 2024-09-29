@@ -35,7 +35,7 @@ static const char * nodeSplit3Test_1(){
 
 static const char * nodeSplit3Test_2(){
     uint16_t elemSize=50;
-    std::vector<uint8_t>key(1), val(100);
+    std::vector<uint8_t>key(1), val(400);
     auto node = new BNode(2);
     node->_setHeader(BTREE_LEAF, elemSize);
     for(int i=0;i<elemSize;i++){
@@ -81,7 +81,7 @@ static const char * insertAndGetTest_KeyNotFound(){
 
 static const char * insertAndGetTest_2Level(){
     BTree *tree = new HashMapDBMemory();
-    std::vector<uint8_t >key(1000,0), val(3000,0);
+    std::vector<uint8_t >key(4000,0), val(3000,0);
     key[0]=5, val[0]=8;
     tree->Insert(key,val);
     key[0]=10, val[0]=12;
@@ -95,7 +95,7 @@ static const char * insertAndGetTest_2Level(){
 
 static const char * insertAndGetTest_3Level(){
     BTree *tree = new HashMapDBMemory();
-    std::vector<uint8_t >key(1000,0), val(3000,0);
+    std::vector<uint8_t >key(4000,0), val(12000,0);
     for(int i=1;i<=5;i++){
         key[0]=i, val[0]=i+10;
         tree->Insert(key,val);

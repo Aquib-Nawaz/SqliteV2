@@ -9,24 +9,35 @@
 #include <vector>
 #include <utility>
 #define OUTPUT_ERROR(x,y) do{if((x)==-1){perror(y);exit(1);}}while(0);
-#define PAGE_SIZE 4096
+#define RETURN_ON_ERROR(x,y)do{if((x)<0){perror(y);return x;}}while(0);
 #define DB_VERSION "SQLITEV2.0"
 
 struct MMapChunk{
-    std::vector<std::pair<uint8_t*, size_t >> chunks;
-    size_t size;
+    std::vector<std::pair<uint8_t*, long long >> chunks;
+    long long size;
 };
+class DiskPageDBMemoryTest;
 
 class DiskPageDBMemory: public BTree {
     int fd;
+    uint64_t flushed;
     std::vector<uint8_t *> pagesToAppend;
-    MMapChunk mmapChunk;
+    struct MMapChunk mmapChunk;
+    int updateFile();
+    int writePages();
+    void extendMMap(long long);
+    int updateRoot();
+    void getMetaData(uint8_t*);
+    int updateOrRevert(uint8_t*);
+    void loadMeta(uint8_t*);
 public:
-    ~DiskPageDBMemory();
+    ~DiskPageDBMemory() override;
      BNode * get(uint64_t) override;
     void del(uint64_t) override;
     uint64_t insert(BNode *) override;
     DiskPageDBMemory(const char* );
+    void Insert(std::vector<uint8_t> &, std::vector<uint8_t> &) override;
+    friend class DiskPageDBMemoryTest;
 };
 
 

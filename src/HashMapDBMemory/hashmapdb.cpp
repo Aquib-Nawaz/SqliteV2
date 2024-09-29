@@ -8,8 +8,8 @@
 
 BNode * HashMapDBMemory::get(uint64_t key) {
     assert(memory.count(key));
-    auto ret = new uint8_t [4096];
-    memcpy(ret, memory[key], 4096);
+    auto ret = new uint8_t [BTREE_PAGE_SIZE];
+    memcpy(ret, memory[key], BTREE_PAGE_SIZE);
     return new BNode(ret);
 }
 
