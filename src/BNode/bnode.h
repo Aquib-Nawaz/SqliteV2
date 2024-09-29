@@ -10,7 +10,7 @@
 #include <unistd.h>
 
 #define HEADER_SIZE 4
-#define BTREE_PAGE_SIZE getpagesize()
+#define BTREE_PAGE_SIZE 16384
 #define KLEN_NUM_BYTES 2
 #define VLEN_NUM_BYTES 2
 #define POINTER_ARRAY_ELEMENT_SIZE 8

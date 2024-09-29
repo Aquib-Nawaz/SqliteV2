@@ -56,7 +56,7 @@ DiskPageDBMemory::DiskPageDBMemory(const char *_path) {
             perror("Unmap: ");
             exit(1);
         }
-        mmapChunk.chunks.emplace_back(map, st.st_size);
+        mmapChunk.chunks.emplace_back(map,  mmapChunk.size);
 
         flushed = littleEndianByteToInt64(map + versionSize+sizeof root);
         root = littleEndianByteToInt64(map + versionSize);
@@ -150,6 +150,7 @@ int DiskPageDBMemory::updateRoot() {
 void DiskPageDBMemory:: getMetaData(uint8_t* data){
     memcpy(data, DB_VERSION, strlen(DB_VERSION));
     littleEndianInt64ToBytes(root, data+ strlen(DB_VERSION));
+    flushed+=pagesToAppend.size();
     littleEndianInt64ToBytes(flushed, data+ strlen(DB_VERSION)+sizeof root);
 }
 
