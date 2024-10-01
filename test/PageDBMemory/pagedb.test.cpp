@@ -53,6 +53,7 @@ class DiskPageDBMemoryTest {
             mu_assert("Val Match", newNode->getVal(i)[0]==i+10);
         }
         delete newNode;
+        std::remove(fileName);
         return nullptr;
     }
 

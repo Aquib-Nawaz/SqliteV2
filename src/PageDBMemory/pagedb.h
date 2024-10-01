@@ -26,10 +26,10 @@ class DiskPageDBMemory: public BTree {
     int updateFile();
     int writePages();
     void extendMMap(long long);
-    int updateRoot();
     void getMetaData(uint8_t*);
-    int updateOrRevert(uint8_t*);
     void loadMeta(uint8_t*);
+    int updateRoot();
+    int updateOrRevert(uint8_t*);
 public:
     ~DiskPageDBMemory() override;
      BNode * get(uint64_t) override;
