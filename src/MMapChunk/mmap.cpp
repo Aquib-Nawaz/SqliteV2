@@ -13,7 +13,7 @@
 
 static const int BTREE_PAGE_SIZE = 16384;
 
-uint16_t seq2Idx(uint64_t seq){
+static uint16_t seq2Idx(uint64_t seq){
     return (uint16_t)(seq%FREE_LIST_CAPACITY);
 }
 

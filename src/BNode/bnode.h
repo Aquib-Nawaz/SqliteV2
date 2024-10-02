@@ -28,7 +28,6 @@ class BNode {
     uint8_t *data;
 public:
     explicit BNode(uint8_t);
-//    BNode(uint16_t , uint16_t);
     void resetData();
     BNode(uint8_t *);
     uint8_t* getData();

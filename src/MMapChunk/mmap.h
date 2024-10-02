@@ -20,8 +20,6 @@
 class MMapTest;
 class MMapChunk;
 
-static uint16_t seq2Idx(uint64_t);
-
 class FList {
 
     uint64_t headPage;
@@ -52,7 +50,10 @@ class MMapChunk{
     uint64_t popFront();
     std::pair<size_t ,uint64_t> getPtrLocation(uint64_t);
     void clearPendingUpdates();
-
+    int writePages();
+    int updateFile();
+    int updateRoot();
+    void loadMeta(uint8_t*);
 public:
 
     std::vector<std::pair<uint8_t*, long long >> chunks;
@@ -61,11 +62,7 @@ public:
     uint64_t insert(uint8_t *);
     void del(uint64_t);
     uint8_t* get(uint64_t);
-    int writePages();
-    int updateFile();
-    int updateRoot();
     uint8_t* getMetaData();
-    void loadMeta(uint8_t*);
     uint64_t getRoot() const;
     void setRoot(uint64_t);
     int updateOrRevert(uint8_t *);
