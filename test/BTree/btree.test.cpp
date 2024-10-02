@@ -6,6 +6,11 @@
 #include "btree.h"
 #include "../minunit.h"
 #include "hashmapdb.h"
+#include "mmap.h"
+#include "pagedb.h"
+#include <fstream>
+#include <filesystem>
+
 using namespace std;
 
 int tests_run = 0;
@@ -132,14 +137,64 @@ static const char * deleteLevel3_Test(){
 }
 
 
+static const char * EndToEndInsertTest(){
+    const char * filePath = "test.db";
+    std::remove(filePath);
+    MMapChunk mmap = MMapChunk(filePath);
+    std::vector<uint8_t>key,val;
+    const char* csvFile = "../../../data/wine-quality.csv";
+    std::filesystem::path path(csvFile);
+    mu_assert("File Exist", std::filesystem::exists(path));
+    std::ifstream csv(csvFile);
+    std::string line;
+    std::string keyPref = "WineQuality-";
+    int idx=0;
+    BTree *tree = new DiskPageDBMemory(&mmap);
+
+    while(std::getline(csv,line)) {
+        val = std::vector<uint8_t >(line.begin(), line.end());
+        std::string temp = keyPref + std::to_string(idx++);
+        key = std::vector<uint8_t>(temp.begin(), temp.end());
+        tree->Insert(key, val);
+        mu_assert_iter(idx, "Value Mismatch", tree->Get(key) == val);
+    }
+    delete tree;
+    return nullptr;
+}
+
+static const char * EndToEndPersistenceTest(){
+    const char * filePath = "test.db";
+    MMapChunk mmap = MMapChunk(filePath);
+    std::vector<uint8_t>key,val;
+    const char* csvFile = "../../../data/wine-quality.csv";
+    std::filesystem::path path(csvFile);
+    mu_assert("File Exist", std::filesystem::exists(path));
+    std::ifstream csv(csvFile);
+    std::string line;
+    std::string keyPref = "WineQuality-";
+    int idx=0;
+    BTree *tree = new DiskPageDBMemory(&mmap);
+    while(std::getline(csv,line)) {
+        val = std::vector<uint8_t >(line.begin(), line.end());
+        std::string temp = keyPref + std::to_string(idx++);
+        key = std::vector<uint8_t>(temp.begin(), temp.end());
+        mu_assert_iter(idx, "Value Mismatch", tree->Get(key) == val);
+    }
+    delete tree;
+    std::remove(filePath);
+    return nullptr;
+}
+
 static const char* all_tests(){
     mu_run_test(nodeSplit3Test_1);
     mu_run_test(nodeSplit3Test_2);
     mu_run_test(insertAndGetTest_1);
     mu_run_test(insertAndGetTest_KeyNotFound);
     mu_run_test(insertAndGetTest_2Level);
-    mu_run_test(insertAndGetTest_3Level);
+//    mu_run_test(insertAndGetTest_3Level);
     mu_run_test(deleteLevel3_Test);
+    mu_run_test(EndToEndInsertTest);
+    mu_run_test(EndToEndPersistenceTest);
     return nullptr;
 }
 

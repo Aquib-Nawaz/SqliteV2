@@ -23,6 +23,7 @@ class MMapChunk;
 static uint16_t seq2Idx(uint64_t);
 
 class FList {
+
     uint64_t headPage;
     uint64_t headSeq;
     uint64_t tailPage;
@@ -39,12 +40,12 @@ public:
 class MMapChunk{
     int fd;
     uint64_t root;
+    uint64_t nAppend;
     uint64_t flushed;
-    std::vector<uint8_t *> pagesToAppend;
+    FList* freeList;
     std::unordered_map<uint64_t, uint8_t*> pagesToSet;
     void extendMMap(long long);
     long long size;
-    FList* freeList;
     void pushBack(uint64_t );
     uint8_t *set(uint64_t );
     std::pair<uint64_t,uint64_t> popHead();
@@ -53,6 +54,7 @@ class MMapChunk{
     void clearPendingUpdates();
 
 public:
+
     std::vector<std::pair<uint8_t*, long long >> chunks;
     ~MMapChunk();
     explicit MMapChunk(const char*);

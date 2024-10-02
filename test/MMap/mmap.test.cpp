@@ -6,6 +6,8 @@
 #include "../minunit.h"
 #include "mmap.h"
 #include <cstdio>
+#include <fstream>
+#include <string>
 using namespace std;
 
 int tests_run = 0;
@@ -42,7 +44,7 @@ class MMapTest {
         MMapChunk db(fileName);
         auto data = db.get(2);
         for(uint8_t i=0;i<0xFF;i++){
-            mu_assert("Key Match", data[i]==i);
+            mu_assert_iter(i,"Key Match", data[i]==i);
         }
         delete data;
         std::remove(fileName);
@@ -78,8 +80,40 @@ class MMapTest {
             mu_assert_iter(i, "Pages Match" , mmap2.popFront()==i+2);
         }
         return nullptr;
-
     }
+
+    static const char* AllocaTeNewPageForFreeList(){
+        const char * filePath = "test.db";
+        std::remove(filePath);
+        MMapChunk mmap = MMapChunk(filePath);
+        auto data = new uint8_t [16384];
+        uint64_t ptr = mmap.insert( data );
+        mmap.updateFile();
+        mmap.del(ptr);
+        mmap.freeList->maxSeq=1;
+        for(int i=1;i<FREE_LIST_CAPACITY;i++){
+            mu_assert_iter(i,"Tail Page", mmap.freeList->tailPage==1);
+            mmap.pushBack(i+2);
+        }
+        mu_assert("Tail Page",
+                  mmap.freeList->tailPage == ptr);
+        return nullptr;
+    }
+
+    static const char * InsertInFreedPageTest(){
+        const char * filePath = "test.db";
+        std::remove(filePath);
+        MMapChunk mmap = MMapChunk(filePath);
+        auto data = new uint8_t [16384];
+        uint64_t ptr = mmap.insert( data );
+        mmap.updateFile();
+        mmap.del(ptr);
+        mmap.freeList->maxSeq=1;
+        data = new uint8_t [16384];
+        mu_assert( "Insert in freed page",mmap.insert(data)==ptr);
+        return nullptr;
+    }
+
 
     public:
     static const char *all_tests() {
@@ -88,6 +122,8 @@ class MMapTest {
         mu_run_test(PageDBPersistenceTest);
         mu_run_test(LNodeTest);
         mu_run_test(PushBackTest);
+        mu_run_test(AllocaTeNewPageForFreeList);
+        mu_run_test(InsertInFreedPageTest);
         return nullptr;
     }
 };

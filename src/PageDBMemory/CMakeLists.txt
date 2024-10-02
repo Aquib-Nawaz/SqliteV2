@@ -8,8 +8,7 @@ target_include_directories(PageDBMemory
 target_link_libraries(PageDBMemory PRIVATE
         SqliteV2_compiler_flags
         DataConversion
-        MMap
 )
 
 target_link_libraries(PageDBMemory PUBLIC
-        BTree)
+        BTree MMap)

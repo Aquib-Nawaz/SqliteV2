@@ -188,7 +188,7 @@ void nodeSplit2(BNode* left, BNode* right, BNode* old){
     int i;
     uint16_t lenReq = HEADER_SIZE;
 
-    for(i=old->nKeys(); lenReq<=BTREE_PAGE_SIZE; i--){
+    for(i=old->nKeys(); lenReq<BTREE_PAGE_SIZE/2; i--){
         lenReq += offSize + old->getOffset(i)-old->getOffset(i-1);
     }
     i++;

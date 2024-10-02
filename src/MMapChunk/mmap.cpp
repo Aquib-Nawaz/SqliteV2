@@ -42,7 +42,9 @@ void LNode::setPtr(uint16_t pos,uint64_t ptr){
     littleEndianInt64ToBytes(ptr,data+pos*8+FREE_LIST_HEADER);
 }
 
-LNode::~LNode(){delete [] data;}
+LNode::~LNode(){
+    delete [] data;
+}
 
 
 int createFileSync(const char * filepath){
@@ -60,12 +62,8 @@ int createFileSync(const char * filepath){
 }
 
 void MMapChunk::clearPendingUpdates() {
-    for(auto i : pagesToAppend){
-        delete [] i;
-    }
     for(auto i : pagesToSet){
-        if(i.first<flushed)
-            delete i.second;
+        delete i.second;
     }
 }
 
@@ -96,6 +94,7 @@ MMapChunk::MMapChunk(const char * _path) {
     bool empty = st.st_size==0;
     size_t versionSize = strlen(DB_VERSION);
     freeList = new FList(1, 0, 1, 0);
+    nAppend=0;
     if(empty){
         size = 0;
         flushed = 2;
@@ -127,8 +126,9 @@ uint64_t MMapChunk::insert(uint8_t * data) {
         pagesToSet[ptr] = data;
         return ptr;
     }
-    pagesToAppend.push_back(data);
-    return flushed+pagesToAppend.size()-1;
+    ptr = flushed+nAppend++;
+    pagesToSet[ptr]=data;
+    return ptr;
 }
 
 std::pair<size_t, uint64_t > MMapChunk::getPtrLocation(uint64_t  ptr){
@@ -142,12 +142,7 @@ std::pair<size_t, uint64_t > MMapChunk::getPtrLocation(uint64_t  ptr){
 }
 
 uint8_t * MMapChunk::get(uint64_t ptr) {
-    assert(ptr <= flushed);
-    if(pagesToSet.count(ptr)!=0){
-        auto data = new uint8_t [BTREE_PAGE_SIZE];
-        memcpy(data ,pagesToSet[ptr],BTREE_PAGE_SIZE);
-        return data;
-    }
+    assert(ptr < flushed);
     auto [chunkNum,offset] = getPtrLocation(ptr);
     auto *data = new uint8_t [BTREE_PAGE_SIZE];
     memcpy(data ,chunks[chunkNum].first+offset,BTREE_PAGE_SIZE);
@@ -163,42 +158,17 @@ void MMapChunk::setRoot(uint64_t _root) {
 }
 
 int MMapChunk::writePages() {
-    long long _size = (long long)(flushed+pagesToAppend.size())*BTREE_PAGE_SIZE;
+    long long _size = (long long)(flushed+nAppend)*BTREE_PAGE_SIZE;
     extendMMap(_size);
-    long long offset = (long long)flushed*BTREE_PAGE_SIZE;
-    size_t chunkNum = 0;
-    while (chunkNum<chunks.size() &&
-           offset>=chunks[chunkNum].second)
-    {
-        offset-=chunks[chunkNum++].second;
-    }
-    long long startOffset = offset;
-    for(auto page:pagesToAppend){
-        assert(chunkNum<chunks.size());
-        memcpy(chunks[chunkNum].first+offset,page,BTREE_PAGE_SIZE);
-        offset+=BTREE_PAGE_SIZE;
-        if(offset==chunks[chunkNum].second){
-            int ret = msync(chunks[chunkNum].first+startOffset,
-                            chunks[chunkNum].second-startOffset, MS_SYNC);
-            RETURN_ON_ERROR(ret, "MSYNC writePages")
-            startOffset=offset=0;
-            chunkNum++;
-        }
-    }
-    if(offset!=startOffset){
-        int ret = msync(chunks[chunkNum].first+startOffset,
-                        offset-startOffset, MS_SYNC);
-        RETURN_ON_ERROR(ret, "MSYNC writePages")
-    }
+
     for(auto it:pagesToSet){
-        if(it.first<flushed){
-            auto [chunk, chunkOffset] = getPtrLocation(it.first);
-            memcpy(chunks[chunk].first+chunkOffset,it.second,BTREE_PAGE_SIZE);
-            int ret = msync(chunks[chunk].first+chunkOffset, BTREE_PAGE_SIZE, MS_SYNC);
-            RETURN_ON_ERROR(ret, "MSYNC updatePages")
-        }
+        auto [chunk, chunkOffset] = getPtrLocation(it.first);
+        memcpy(chunks[chunk].first+chunkOffset,it.second,BTREE_PAGE_SIZE);
+        int ret = msync(chunks[chunk].first+chunkOffset, BTREE_PAGE_SIZE, MS_SYNC);
+        RETURN_ON_ERROR(ret, "MSYNC updatePages")
     }
-    flushed += pagesToAppend.size();
+    flushed += nAppend;
+    nAppend = 0;
     freeList->setMaxSeq();
     return 0;
 }
@@ -213,9 +183,12 @@ int MMapChunk::updateFile() {
 
 int MMapChunk::updateRoot() {
     auto metadata = getMetaData();
-    OUTPUT_ERROR( write(fd, metadata, strlen(DB_VERSION)+48), "write updateRoot")
+//    OUTPUT_ERROR( write(fd, metadata, strlen(DB_VERSION)+48), "write updateRoot")
+    memcpy(chunks[0].first, metadata, strlen(DB_VERSION)+48);
+    int ret = msync(chunks[0].first, strlen(DB_VERSION)+48, MS_SYNC);
+    RETURN_ON_ERROR(ret, "MSYNC updateRoot")
     delete[] metadata;
-    OUTPUT_ERROR( fsync(fd), "fsync updateRoot")
+//    OUTPUT_ERROR( fsync(fd), "fsync updateRoot")
     return 0;
 }
 
@@ -241,7 +214,6 @@ uint8_t* MMapChunk:: getMetaData(){
 int MMapChunk::updateOrRevert(uint8_t * curMetaData) {
     int err = updateFile();
     clearPendingUpdates();
-    pagesToAppend.clear();
     pagesToSet.clear();
     if(err){
         loadMeta(curMetaData);
@@ -267,7 +239,10 @@ void MMapChunk::loadMeta(uint8_t * data) {
 void MMapChunk::del(uint64_t ptr) {
     assert(ptr<flushed);
     pushBack(ptr);
-    pagesToSet.erase(ptr);
+    if(pagesToSet.count(ptr)){
+        delete [] pagesToSet[ptr];
+        pagesToSet.erase(ptr);
+    }
 }
 
 uint8_t * MMapChunk::set(uint64_t ptr) {
@@ -281,8 +256,9 @@ std::pair<uint64_t,uint64_t> MMapChunk::popHead(){
     if(freeList->headSeq==freeList->maxSeq ){
         return {0,0};
     }
-    LNode node(get(freeList->headPage));
+    LNode node(set(freeList->headPage));
     uint64_t ptr =  node.getPtr(seq2Idx(freeList->headSeq));
+    assert(ptr<flushed);
     uint64_t head=0;
     freeList->headSeq++;
     if(seq2Idx(freeList->headSeq)==0){
@@ -303,6 +279,7 @@ uint64_t  MMapChunk::popFront(){
 }
 
 void MMapChunk::pushBack(uint64_t ptr) {
+    assert(ptr<flushed);
     LNode node(set(freeList->tailPage));
     node.setPtr(seq2Idx(freeList->tailSeq),ptr);
     freeList->tailSeq++;
