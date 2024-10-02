@@ -20,11 +20,6 @@ BNode::BNode(uint8_t * _data){
     nkeys = littleEndianByteToInt16(data+2);
 }
 
-BNode::BNode( uint16_t btype, uint16_t nkeys) {
-    data = new uint8_t[BTREE_PAGE_SIZE];
-    _setHeader(btype, nkeys);
-}
-
 uint16_t BNode::bType() const {
     return btype;
 }

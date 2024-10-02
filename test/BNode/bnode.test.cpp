@@ -11,7 +11,8 @@ using namespace std;
 int tests_run = 0;
 
 const static char* setHeaderTest(){
-    BNode bnode(BTREE_INTERIOR,23);
+    BNode bnode(1);
+    bnode._setHeader(BTREE_INTERIOR,23);
     mu_assert("bnode.setHeader failed", bnode.bType() == BTREE_INTERIOR
     && bnode.nKeys() == 23);
     return nullptr;
@@ -19,10 +20,12 @@ const static char* setHeaderTest(){
 
 
 static const char* setOffsetTest(){
-    BNode bnode(BTREE_INTERIOR,1);
+    BNode bnode(1);
+    bnode._setHeader(BTREE_INTERIOR,1);
     bnode.setOffset(1, 24);
     mu_assert("interior bnode.setOffset does not match bnode.getOffset", bnode.getOffset(1) == 24);
-    BNode leaf(BTREE_LEAF,3);
+    BNode leaf(1);
+    leaf._setHeader(BTREE_LEAF,3);
     leaf.setOffset(2,25);
     leaf.setOffset(1,33);
     mu_assert("leaf leaf.setOffset does not match leaf.getOffset", leaf.getOffset(2) == 25 && leaf.getOffset(1)==33);
@@ -30,7 +33,8 @@ static const char* setOffsetTest(){
 }
 
 static const char * setPtrTest(){
-    BNode bnode(BTREE_INTERIOR, 3);
+    BNode bnode(1);
+    bnode._setHeader(BTREE_INTERIOR, 3);
     uint64_t ptr[3] = {0x1213141112131412, 0x21312312431, 0x213123};
     for(int i=0;i<3;i++)bnode.setPtr(i, ptr[i]);
     bool res= true;
@@ -42,7 +46,8 @@ static const char * setPtrTest(){
 }
 
 static const char* nodeAppendKVLeafTest(){
-    BNode bnode(BTREE_LEAF, 3);
+    BNode bnode(1);
+    bnode._setHeader(BTREE_LEAF, 3);
     std::vector<uint8_t >data[3][2] = {
             {{1,2,3}, {4,5,6}},
             {{7,8}, {10,11,12}},
@@ -63,7 +68,8 @@ static const char* nodeAppendKVLeafTest(){
 }
 
 static const char *nodeLookUpLETest(){
-    BNode bnode(BTREE_LEAF, 10);
+    BNode bnode(1);
+    bnode._setHeader(BTREE_LEAF, 10);
     std::vector<uint8_t >data(1);
     for(uint8_t i=0;i<10;i++){
         data[0] = i;
@@ -78,7 +84,8 @@ static const char *nodeLookUpLETest(){
 }
 
 static const char* leafInsertTest() {
-    BNode bnode(BTREE_INTERIOR, 9);
+    BNode bnode(1);
+    bnode._setHeader(BTREE_INTERIOR, 9);
     std::vector<uint8_t >data(1),v;
     for(uint8_t i=0;i<5;i++){
         data[0] = i;
@@ -101,7 +108,8 @@ static const char* leafInsertTest() {
 }
 
 static const char * leafDeleteTest(){
-    BNode bnode(BTREE_INTERIOR, 9);
+    BNode bnode(1);
+    bnode._setHeader(BTREE_INTERIOR, 9);
     std::vector<uint8_t >data(1),v;
     for(uint8_t i=0;i<9;i++){
         data[0] = i;
