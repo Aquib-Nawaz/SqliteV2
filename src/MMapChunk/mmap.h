@@ -81,5 +81,4 @@ public:
     ~LNode();
 };
 
-
-#endif //SQLITEV2_MMAP_H
+#endif
