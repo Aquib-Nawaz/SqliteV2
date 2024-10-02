@@ -259,22 +259,6 @@ void nodeMerge(BNode* merged, BNode* left, BNode* right){
     delete right;
 }
 
-//uint64_t BTree::insert(BNode * node) {
-//    uint64_t ret = memory->insert(node->getData(), BTREE_PAGE_SIZE);
-//    node->resetData();
-//    delete node;
-//    return ret;
-//}
-//
-//void BTree::del(uint64_t ptr) {
-//    memory->del(ptr);
-//}
-//
-//BNode* BTree::get(uint64_t ptr) {
-//    auto ret = new BNode(memory->get(ptr));
-//    return ret;
-//}
-
 void nodeReplace2Kid(BNode* newNode, BNode* oldNode, uint16_t idx, uint64_t ptr,
                 std::vector<uint8_t > &key){
     //delete idx and idx+1
