@@ -70,6 +70,7 @@ class MMapTest {
         std::remove(filePath);
         MMapChunk mmap = MMapChunk(filePath);
         mmap.writePages();
+        mmap.flushed = 12;
         for(int i=0;i<10;i++){
             mmap.pushBack(i+2);
             mu_assert_iter(i, "Tail Seq Match", mmap.freeList->tailSeq==i+1);
@@ -91,6 +92,7 @@ class MMapTest {
         mmap.updateFile();
         mmap.del(ptr);
         mmap.freeList->maxSeq=1;
+        mmap.flushed = FREE_LIST_CAPACITY+2;
         for(int i=1;i<FREE_LIST_CAPACITY;i++){
             mu_assert_iter(i,"Tail Page", mmap.freeList->tailPage==1);
             mmap.pushBack(i+2);
