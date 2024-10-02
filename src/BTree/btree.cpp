@@ -192,6 +192,7 @@ void nodeSplit2(BNode* left, BNode* right, BNode* old){
         lenReq += offSize + old->getOffset(i)-old->getOffset(i-1);
     }
     i++;
+    if(i==old->nKeys())i--;
     right->_setHeader(old->bType(), old->nKeys()-i);
     right->nodeAppendRange(old, 0,i, old->nKeys()-i);
 

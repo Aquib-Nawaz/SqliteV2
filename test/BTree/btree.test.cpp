@@ -191,7 +191,7 @@ static const char* all_tests(){
     mu_run_test(insertAndGetTest_1);
     mu_run_test(insertAndGetTest_KeyNotFound);
     mu_run_test(insertAndGetTest_2Level);
-//    mu_run_test(insertAndGetTest_3Level);
+    mu_run_test(insertAndGetTest_3Level);
     mu_run_test(deleteLevel3_Test);
     mu_run_test(EndToEndInsertTest);
     mu_run_test(EndToEndPersistenceTest);
