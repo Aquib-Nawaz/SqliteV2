@@ -64,11 +64,11 @@ static const char * CheckAndReorderTest(){
 
     Row row;
     row.pushRow("col1", new IntRecord(1));
-    mu_assert("Row::checkAndReorder", row.checkAndReorder(def));
+    mu_assert("Row::checkAndReorder", row.checkAndReorder(def, true));
     row.pushRow("col3", new IntRecord(2));
-    mu_assert("Row::checkAndReorder", !row.checkAndReorder(def));
+    mu_assert("Row::checkAndReorder", !row.checkAndReorder(def, false));
     row.pushRow("col2", new StringRecord("Hello", 5));
-    mu_assert("Row::checkAndReorder", row.checkAndReorder(def));
+    mu_assert("Row::checkAndReorder", row.checkAndReorder(def, false));
     return nullptr;
 }
 

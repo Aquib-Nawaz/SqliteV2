@@ -6,16 +6,29 @@
 #include "table.h"
 #include "convertor.h"
 
-StringRecord::StringRecord(const char* _value, uint32_t _len):
-    value(_value), len(_len) {}
+StringRecord::StringRecord(const char* _value, uint32_t _len, bool _copy):copy(_copy),
+    len(_len) {
+    if(copy){
+        value = new char[len];
+        memcpy((void*)value, _value, len);
+    }
+    else{
+        value = _value;
+    }
+}
 
 uint32_t StringRecord::lengthInBytes() {
     return len+2;
 }
 
-StringRecord::StringRecord(uint8_t * bytes) {
+StringRecord::StringRecord(uint8_t * bytes, bool _copy):copy(_copy) {
     len = littleEndianByteToInt16(bytes);
-    value = (const char*)bytes+2;
+    if(copy){
+        value = new char[len];
+        memcpy((void*)value, bytes+2, len);
+    }
+    else
+        value = (const char*)bytes+2;
 }
 
 uint32_t StringRecord::convertToBytes(uint8_t * bytes) {
@@ -30,6 +43,12 @@ RecordType StringRecord::getType() {
 
 std::string StringRecord::toString() {
     return {value, len};
+}
+
+StringRecord::~StringRecord() {
+    if(copy){
+        delete[] value;
+    }
 }
 
 IntRecord::IntRecord(int _val):value(_val){
@@ -140,7 +159,7 @@ Row:: Row(std::vector<uint8_t> &key, std::vector<uint8_t> &val, TableDef &tableD
             value.push_back(new IntRecord(littleEndianByteToInt32(data + offset)));
             offset += 4;
         }else if(tableDef.types[i] == RECORD_STRING){
-            value.push_back(new StringRecord(data+offset));
+            value.push_back(new StringRecord(data+offset, true));
             offset += value.back()->lengthInBytes();
         }
         if(i==tableDef.pKey-1){
@@ -161,9 +180,9 @@ void Row::pushRow(std::string col, Record* val){
     value.push_back(val);
 }
 
-bool Row::checkAndReorder(TableDef &tableDef) {
+bool Row::checkAndReorder(TableDef &tableDef, bool isKey) {
 
-    if(cols.size() != tableDef.columnNames.size() && tableDef.pKey != cols.size()){
+    if(!(isKey ? cols.size() == tableDef.pKey : cols.size() == tableDef.columnNames.size())){
         return false;
     }
     std::vector<Record*> temp;
@@ -186,6 +205,22 @@ bool Row::checkAndReorder(TableDef &tableDef) {
         cols[i] = tableDef.columnNames[i];
     }
     return true;
+}
+
+void Row::populateValue(TableDef &tableDef, std::vector<uint8_t> &val) {
+    assert(tableDef.pKey==cols.size());
+    uint32_t offset = 0;
+    uint8_t *data = val.data();
+    for(int i=tableDef.pKey;i<(int)tableDef.columnNames.size();i++){
+        if(tableDef.types[i] == RECORD_INT){
+            value.push_back(new IntRecord(littleEndianByteToInt32(data+offset)));
+            offset += 4;
+        }else if(tableDef.types[i] == RECORD_STRING){
+            value.push_back(new StringRecord(data+offset, true));
+            offset += value.back()->lengthInBytes();
+        }
+        cols.push_back(tableDef.columnNames[i]);
+    }
 }
 
 uint32_t Row::keyLength(TableDef & def) {

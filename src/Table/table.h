@@ -24,14 +24,16 @@ public:
 
 class StringRecord: public Record{
     const char* value;
+    bool copy;
     uint32_t len;
 public:
-    StringRecord(const char* _value, uint32_t len);
-    explicit StringRecord(uint8_t *);
+    StringRecord(const char* _value, uint32_t len, bool copy=false);
+    explicit StringRecord(uint8_t *, bool copy=false);
     uint32_t lengthInBytes() override;
     uint32_t convertToBytes(uint8_t *) override;
     RecordType getType() override;
     std::string toString();
+    ~StringRecord() override;
 };
 
 class IntRecord: public Record{
@@ -41,8 +43,8 @@ public:
     uint32_t lengthInBytes() override;
     uint32_t convertToBytes(uint8_t *) override;
     RecordType getType() override;
-    IntRecord(uint8_t *);
-    int toInt() const;
+    explicit IntRecord(uint8_t *);
+    [[nodiscard]] int toInt() const;
 };
 class Row;
 // | 4B prefix | 2B pKey| 2B numRecords | recordType | columnName
@@ -75,7 +77,8 @@ public:
     Row (std::vector<uint8_t> &key, std::vector<uint8_t> &val, TableDef &tableDef);
     Row (std::vector<std::string>, std::vector<Record*>);
     void pushRow(std::string col, Record* val);
-    bool checkAndReorder(TableDef &tableDef);
+    bool checkAndReorder(TableDef &tableDef, bool isKey);
+    void populateValue(TableDef &tableDef, std::vector<uint8_t> &val);
     std::vector<uint8_t> getKey(TableDef &tableDef);
     std::vector<uint8_t> getValue(TableDef &tableDef);
     ~Row();
