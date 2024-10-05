@@ -29,10 +29,10 @@ class BNode {
 public:
     explicit BNode(uint8_t);
     void resetData();
-    BNode(uint8_t *);
+    explicit BNode(uint8_t *);
     uint8_t* getData();
-    uint16_t bType() const;
-    uint16_t nKeys() const;
+    [[nodiscard]] uint16_t bType() const;
+    [[nodiscard]] uint16_t nKeys() const;
     void _setHeader(uint16_t,uint16_t);
     void shrink(uint16_t ns);
     uint16_t nBytes();
