@@ -13,12 +13,24 @@ int tests_run = 0;
 static const char* StringRecordTest(){
     string str = "Hello World";
     StringRecord record(str.c_str(), str.size());
-    mu_assert("StringRecord::lengthInBytes", record.lengthInBytes() == str.size()+2);
+    mu_assert("StringRecord::lengthInBytes", record.lengthInBytes() == str.size()+1);
     mu_assert("StringRecord::toString", record.toString() == str);
     mu_assert("StringRecord::getType", record.getType() == RECORD_STRING);
     uint8_t bytes[record.lengthInBytes()];
     record.convertToBytes(bytes);
-    mu_assert("StringRecord::convertToBytes length", littleEndianByteToInt16(bytes) == str.size());
+    mu_assert("StringRecord::convertToBytes", StringRecord(bytes).toString()==str);
+    return nullptr;
+}
+
+static const char* StringRecordWithNullPtrTest(){
+    string str = "Hello World";
+    str[5]='\0';
+    str.push_back(1);
+    StringRecord record(str.c_str(), str.size());
+    mu_assert("StringRecord::lengthInBytes", record.lengthInBytes() == str.size()+3);
+    mu_assert("StringRecord::toString", record.toString() == str);
+    uint8_t bytes[record.lengthInBytes()];
+    record.convertToBytes(bytes);
     mu_assert("StringRecord::convertToBytes", StringRecord(bytes).toString()==str);
     return nullptr;
 }
@@ -94,6 +106,7 @@ static const char * RowToByteTest(){
 
 static const char* all_tests(){
     mu_run_test(StringRecordTest);
+    mu_run_test(StringRecordWithNullPtrTest);
     mu_run_test(IntRecordTest);
     mu_run_test(TableDefTest);
     mu_run_test(CheckAndReorderTest);

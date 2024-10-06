@@ -27,9 +27,11 @@ class StringRecord: public Record{
     const char* value;
     bool copy;
     uint32_t len;
+    uint32_t byteLen;
+    uint32_t _lengthInBytes();
 public:
     StringRecord(const char* _value, uint32_t len, bool copy=false);
-    StringRecord(uint8_t *, bool copy=false);
+    StringRecord(const uint8_t *);
     uint32_t lengthInBytes() override;
     uint32_t convertToBytes(uint8_t *) override;
     RecordType getType() override;

@@ -15,26 +15,57 @@ StringRecord::StringRecord(const char* _value, uint32_t _len, bool _copy):copy(_
     else{
         value = _value;
     }
+    byteLen = _lengthInBytes();
+}
+
+StringRecord::StringRecord(const uint8_t * bytes):copy(true) {
+    len=0;
+    uint32_t i,j;
+    for( i=0;i<=4000&&bytes[i];i++){
+        if(bytes[i] == 1 ){
+            i++;
+        }
+        len++;
+    }
+    byteLen = i+1;
+    char* str = new char[len];
+    for(i=0,j=0;i<byteLen;i++,j++){
+        if(bytes[i] == 1){
+            str[j] = bytes[++i]-1;
+        }
+        else
+            str[j] = bytes[i];
+    }
+    value = str;
+}
+
+
+uint32_t StringRecord::_lengthInBytes() {
+    uint32_t ret = len+1;
+    for(uint32_t i=0;i<len;i++){
+        if(value[i] == 0 || value[i] == 1){
+            ret++;
+        }
+    }
+    return ret;
 }
 
 uint32_t StringRecord::lengthInBytes() {
-    return len+2;
-}
-
-StringRecord::StringRecord(uint8_t * bytes, bool _copy):copy(_copy) {
-    len = littleEndianByteToInt16(bytes);
-    if(copy){
-        value = new char[len];
-        memcpy((void*)value, bytes+2, len);
-    }
-    else
-        value = (const char*)bytes+2;
+    return byteLen;
 }
 
 uint32_t StringRecord::convertToBytes(uint8_t * bytes) {
-    littleEndianInt16ToBytes(len, bytes);
-    memcpy(bytes+2, value, len);
-    return lengthInBytes();
+    uint32_t l = 0;
+    for(uint32_t i=0;i<len;i++){
+        if(value[i] == 0 || value[i] == 1){
+            bytes[l++] = 1;
+            bytes[l++] = value[i]+1;
+        }
+        else
+            bytes[l++] = value[i];
+    }
+    bytes[l++] = 0;
+    return l;
 }
 
 RecordType StringRecord::getType() {
@@ -163,7 +194,7 @@ Row:: Row(std::vector<uint8_t> &key, std::vector<uint8_t> &val, TableDef &tableD
             value.push_back(new IntRecord(data + offset));
             offset += 4;
         }else if(tableDef.types[i] == RECORD_STRING){
-            value.push_back(new StringRecord(data+offset, true));
+            value.push_back(new StringRecord(data+offset));
             offset += value.back()->lengthInBytes();
         }
         if(i==tableDef.pKey-1){
@@ -220,7 +251,7 @@ void Row::populateValue(TableDef &tableDef, std::vector<uint8_t> &val) {
             value.push_back(new IntRecord(data+offset));
             offset += 4;
         }else if(tableDef.types[i] == RECORD_STRING){
-            value.push_back(new StringRecord(data+offset, true));
+            value.push_back(new StringRecord(data+offset));
             offset += value.back()->lengthInBytes();
         }
         cols.push_back(tableDef.columnNames[i]);
