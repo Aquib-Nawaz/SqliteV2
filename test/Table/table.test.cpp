@@ -2,7 +2,6 @@
 // Created by Aquib Nawaz on 05/10/24.
 //
 
-#include <iostream>
 #include <string>
 #include "../minunit.h"
 #include "table.h"
@@ -48,7 +47,7 @@ static const char* TableDefTest(){
 
     std::vector<uint8_t >key=def.getKey(), val=def.getValue();
     TableDef def2(key.data(), val.data());
-    mu_assert("TableDef::first", IntRecord(key.data()).toInt() == 1);
+    mu_assert("TableDef::first", littleEndianByteToInt32(key.data()) == 1);
     mu_assert("TableDef::equality", def2 == def);
     return nullptr;
 }

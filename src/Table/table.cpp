@@ -80,7 +80,7 @@ std::string IntRecord::toString() {
 }
 
 TableDef::TableDef(uint8_t * key , uint8_t * val) {
-    prefix = IntRecord(val).toInt();
+    prefix = littleEndianByteToInt32(val);
     uint32_t offset=4;
     pKey = littleEndianByteToInt16(val + offset);
     offset+=2;
@@ -132,7 +132,7 @@ std::vector<uint8_t> TableDef::getValue() {
 
 std::vector<uint8_t> TableDef::getKey() const {
     std::vector<uint8_t> bytes(keyLength());
-    littleEndianInt32ToBytes(1, bytes.data());
+    IntRecord(1).convertToBytes(bytes.data());
     StringRecord(name.c_str(), name.length()).convertToBytes(bytes.data()+4);
     return bytes;
 }
@@ -246,7 +246,7 @@ uint32_t Row::valueLength(TableDef &def) {
 
 std::vector<uint8_t> Row::getKey(TableDef &tableDef) {
     std::vector<uint8_t> bytes(keyLength(tableDef));
-    littleEndianInt32ToBytes(tableDef.prefix, bytes.data());
+   IntRecord(tableDef.prefix).convertToBytes(bytes.data());
     uint32_t offset = 4;
     for(int i=0;i<tableDef.pKey;i++){
         offset += value[i]->convertToBytes(bytes.data()+offset);
