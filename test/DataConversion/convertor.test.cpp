@@ -12,29 +12,29 @@ int tests_run = 0;
 static const char* littleEndianByteToInt16Test(){
 
     uint8_t bytes[2] = {0x01, 0x00};
-    uint16_t result = bigEndianByteToInt16(bytes);
+    uint16_t result = littleEndianByteToInt16(bytes);
 
-    mu_assert("error in bigEndianByteToInt16 cond 1" ,result == 0x0100);
+    mu_assert("error in littleEndianByteToInt16 cond 1" ,result == 0x0100);
     bytes[0] = 0xFF;
     bytes[1] = 0x20;
-    result = bigEndianByteToInt16(bytes);
-    mu_assert("error in bigEndianByteToInt16 cond 2", result == 0xFF20);
+    result = littleEndianByteToInt16(bytes);
+    mu_assert("error in littleEndianByteToInt16 cond 2", result == 0xFF20);
     return nullptr;
 }
 
 static const char * littleEndianInt16ToBytesTest(){
     uint16_t val = 0x0100;
     uint8_t byte[2] = {0x00, 0x00};
-    bigEndianInt16ToBytes(val, byte);
-    mu_assert("error in bigEndianInt16ToBytes cond 1", byte[0] == 0x01 && byte[1] == 0x00);
+    littleEndianInt16ToBytes(val, byte);
+    mu_assert("error in littleEndianInt16ToBytes cond 1", byte[0] == 0x01 && byte[1] == 0x00);
     return nullptr;
 }
 
 
 static const char* littleEndianByteToInt64Test(){
     uint8_t bytes[8] = {0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    uint64_t result = bigEndianByteToInt64(bytes);
-    mu_assert("error in bigEndianByteToInt64 cond 1", result == 0x0100000000000000);
+    uint64_t result = littleEndianByteToInt64(bytes);
+    mu_assert("error in littleEndianByteToInt64 cond 1", result == 0x0100000000000000);
     bytes[0] = 0xFF;
     bytes[1] = 0x20;
     bytes[2] = 0x00;
@@ -43,8 +43,8 @@ static const char* littleEndianByteToInt64Test(){
     bytes[5] = 0x00;
     bytes[6] = 0x00;
     bytes[7] = 0x00;
-    result = bigEndianByteToInt64(bytes);
-    mu_assert("error in bigEndianByteToInt64 cond 2", result == 0xFF20000000000000);
+    result = littleEndianByteToInt64(bytes);
+    mu_assert("error in littleEndianByteToInt64 cond 2", result == 0xFF20000000000000);
     return nullptr;
 }
 

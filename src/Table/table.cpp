@@ -22,7 +22,7 @@ uint32_t StringRecord::lengthInBytes() {
 }
 
 StringRecord::StringRecord(uint8_t * bytes, bool _copy):copy(_copy) {
-    len = bigEndianByteToInt16(bytes);
+    len = littleEndianByteToInt16(bytes);
     if(copy){
         value = new char[len];
         memcpy((void*)value, bytes+2, len);
@@ -32,7 +32,7 @@ StringRecord::StringRecord(uint8_t * bytes, bool _copy):copy(_copy) {
 }
 
 uint32_t StringRecord::convertToBytes(uint8_t * bytes) {
-    bigEndianInt16ToBytes(len, bytes);
+    littleEndianInt16ToBytes(len, bytes);
     memcpy(bytes+2, value, len);
     return lengthInBytes();
 }
@@ -82,9 +82,9 @@ std::string IntRecord::toString() {
 TableDef::TableDef(uint8_t * key , uint8_t * val) {
     prefix = littleEndianByteToInt32(val);
     uint32_t offset=4;
-    pKey = bigEndianByteToInt16(val + offset);
+    pKey = littleEndianByteToInt16(val + offset);
     offset+=2;
-    uint16_t numRecords = bigEndianByteToInt16(val + offset);
+    uint16_t numRecords = littleEndianByteToInt16(val + offset);
     offset+=2;
     for(int i=0;i<(int)numRecords;i++){
         types.push_back((RecordType)val[offset++]);
@@ -117,9 +117,9 @@ std::vector<uint8_t> TableDef::getValue() {
     std::vector<uint8_t> bytes(valueLength());
     littleEndianInt32ToBytes(prefix, bytes.data() + offset);
     offset += 4;
-    bigEndianInt16ToBytes(pKey, bytes.data() + offset);
+    littleEndianInt16ToBytes(pKey, bytes.data() + offset);
     offset += 2;
-    bigEndianInt16ToBytes(types.size(), bytes.data() + offset);
+    littleEndianInt16ToBytes(types.size(), bytes.data() + offset);
     offset += 2;
     int sz = (int)types.size();
     for(int i=0;i<sz;i++){

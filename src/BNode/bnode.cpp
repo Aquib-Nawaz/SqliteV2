@@ -16,8 +16,8 @@ void BNode::resetData(){
 
 BNode::BNode(uint8_t * _data){
     data = _data;
-    btype = bigEndianByteToInt16(data);
-    nkeys = bigEndianByteToInt16(data + 2);
+    btype = littleEndianByteToInt16(data);
+    nkeys = littleEndianByteToInt16(data + 2);
 }
 
 uint16_t BNode::bType() const {
@@ -29,8 +29,8 @@ uint16_t BNode::nKeys() const {
 }
 
 void BNode::_setHeader(uint16_t type, uint16_t numkeys) {
-    bigEndianInt16ToBytes(type, data);
-    bigEndianInt16ToBytes(numkeys, data + 2);
+    littleEndianInt16ToBytes(type, data);
+    littleEndianInt16ToBytes(numkeys, data + 2);
     btype = type;
     nkeys = numkeys;
 }
@@ -43,20 +43,20 @@ uint16_t BNode::getOffset(uint16_t idx){
     assert(idx<=nkeys && idx>=0);
     if(idx == 0)
         return 0;
-    return bigEndianByteToInt16(data + offsetPos(idx));
+    return littleEndianByteToInt16(data + offsetPos(idx));
 }
 
 
 void BNode::setOffset( uint16_t idx, uint16_t offset){
     assert(idx<=nkeys && idx>=1);
-    bigEndianInt16ToBytes(offset, data + offsetPos(idx));
+    littleEndianInt16ToBytes(offset, data + offsetPos(idx));
 }
 
 uint64_t BNode::getPtr(uint16_t idx) {
     assert(idx<nkeys && idx>=0);
     uint16_t pos = HEADER_SIZE + idx*POINTER_ARRAY_ELEMENT_SIZE +
             nkeys*OFFSET_ARRAY_ELEMENT_SIZE;
-    return bigEndianByteToInt64(data + pos);
+    return littleEndianByteToInt64(data + pos);
 }
 
 void BNode::setPtr(uint16_t idx, uint64_t ptr) {
@@ -74,7 +74,7 @@ uint16_t BNode::kvPos(uint16_t idx) {
 std::vector<uint8_t> BNode::getKey(uint16_t idx) {
     assert(idx<nkeys && idx>=0);
     uint16_t pos = kvPos(idx);
-    uint16_t klen = bigEndianByteToInt16(data + pos);
+    uint16_t klen = littleEndianByteToInt16(data + pos);
     std::vector<uint8_t> ret(klen);
     memcpy(ret.data(), data + pos + KLEN_NUM_BYTES + VLEN_NUM_BYTES, klen);
     return ret;
@@ -83,8 +83,8 @@ std::vector<uint8_t> BNode::getKey(uint16_t idx) {
 std::vector<uint8_t> BNode::getVal(uint16_t idx) {
     assert(idx<nkeys && idx>=0);
     uint16_t pos = kvPos(idx);
-    uint16_t keyLen = bigEndianByteToInt16(data + pos);
-    uint16_t valueLen = bigEndianByteToInt16(data + pos + 2);
+    uint16_t keyLen = littleEndianByteToInt16(data + pos);
+    uint16_t valueLen = littleEndianByteToInt16(data + pos + 2);
     std::vector<uint8_t> ret(valueLen);
 
     memcpy(&ret[0], data + pos + KLEN_NUM_BYTES +
@@ -128,10 +128,10 @@ void BNode::nodeAppendKV(uint16_t idx, std::vector<uint8_t> &key, std::vector<ui
     uint16_t pos = kvPos(idx);
     uint16_t klen = key.size();
 
-    bigEndianInt16ToBytes(klen, data + pos);
+    littleEndianInt16ToBytes(klen, data + pos);
     pos+=KLEN_NUM_BYTES;
     uint16_t vlen = val.size();
-    bigEndianInt16ToBytes(vlen, data + pos);
+    littleEndianInt16ToBytes(vlen, data + pos);
     pos+=VLEN_NUM_BYTES;
     modifyData(pos, key.data(), klen);
     pos+=klen;

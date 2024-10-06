@@ -19,7 +19,7 @@ static const char* StringRecordTest(){
     mu_assert("StringRecord::getType", record.getType() == RECORD_STRING);
     uint8_t bytes[record.lengthInBytes()];
     record.convertToBytes(bytes);
-    mu_assert("StringRecord::convertToBytes length", bigEndianByteToInt16(bytes) == str.size());
+    mu_assert("StringRecord::convertToBytes length", littleEndianByteToInt16(bytes) == str.size());
     mu_assert("StringRecord::convertToBytes", StringRecord(bytes).toString()==str);
     return nullptr;
 }

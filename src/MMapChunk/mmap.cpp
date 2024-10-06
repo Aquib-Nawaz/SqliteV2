@@ -27,7 +27,7 @@ LNode::LNode(uint8_t *d):data(d){}
 void LNode::resetData() {data=nullptr;}
 
 uint64_t LNode::getNext(){
-    return bigEndianByteToInt64(data);
+    return littleEndianByteToInt64(data);
 }
 
 void LNode::setNext(uint64_t next){
@@ -35,7 +35,7 @@ void LNode::setNext(uint64_t next){
 }
 
 uint64_t LNode::getPtr(uint16_t pos){
-    return bigEndianByteToInt64(data + pos * 8 + FREE_LIST_HEADER);
+    return littleEndianByteToInt64(data + pos * 8 + FREE_LIST_HEADER);
 }
 
 void LNode::setPtr(uint16_t pos,uint64_t ptr){
@@ -103,7 +103,7 @@ MMapChunk::MMapChunk(const char * _path) {
     else{
         uint8_t sizeData[8];
         pread(fd, sizeData, 8, versionSize+8);
-        size = bigEndianByteToInt64(sizeData) * BTREE_PAGE_SIZE;
+        size = littleEndianByteToInt64(sizeData) * BTREE_PAGE_SIZE;
         auto map =(uint8_t *) mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
         if(map==MAP_FAILED){
             perror("constructor mmap");
@@ -223,17 +223,17 @@ int MMapChunk::updateOrRevert(uint8_t * curMetaData) {
 
 void MMapChunk::loadMeta(uint8_t * data) {
     uint8_t *cur = data+strlen(DB_VERSION);
-    root = bigEndianByteToInt64(cur);
+    root = littleEndianByteToInt64(cur);
     cur+=sizeof root;
-    flushed = bigEndianByteToInt64(cur);
+    flushed = littleEndianByteToInt64(cur);
     cur+=sizeof flushed;
-    freeList->headPage = bigEndianByteToInt64(cur);
+    freeList->headPage = littleEndianByteToInt64(cur);
     cur+=sizeof freeList->headPage;
-    freeList->headSeq = bigEndianByteToInt64(cur);
+    freeList->headSeq = littleEndianByteToInt64(cur);
     cur+=sizeof freeList->headSeq;
-    freeList->tailPage = bigEndianByteToInt64(cur);
+    freeList->tailPage = littleEndianByteToInt64(cur);
     cur+=sizeof freeList->tailPage;
-    freeList->tailSeq = bigEndianByteToInt64(cur);
+    freeList->tailSeq = littleEndianByteToInt64(cur);
 }
 
 void MMapChunk::del(uint64_t ptr) {
