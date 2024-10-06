@@ -60,10 +60,10 @@ class TableDef {
     TableDef()=default;
     TableDef(uint8_t *, uint8_t *);
     bool operator==(const TableDef &rhs) const;
-    uint32_t keyLength();
+    uint32_t keyLength() const;
     uint32_t valueLength();
     void pushColumn(std::string col, RecordType type);
-    std::vector<uint8_t> getKey();
+    std::vector<uint8_t> getKey() const;
     std::vector<uint8_t> getValue();
     bool checkSanity();
     friend class Row;
