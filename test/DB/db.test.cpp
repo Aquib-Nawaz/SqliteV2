@@ -78,7 +78,7 @@ static const char* all_tests(){
 }
 
 
-int main(int argc , char* argv[]){
+int main(){
 
     const char * result = all_tests();
     printf("Executing test file: %s\n", __FILE_NAME__);

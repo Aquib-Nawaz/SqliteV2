@@ -23,21 +23,21 @@ uint64_t bigEndianByteToInt64(const uint8_t bytes[] ){
     return ret;
 }
 
-void littleEndianInt64ToBytes(uint64_t val, uint8_t bytes[]){
+void bigEndianInt64ToBytes(uint64_t val, uint8_t bytes[]) {
     for(int i=7;i>=0;i--){
         bytes[i] = val & 0xFF;
         val = val >> 8;
     }
 }
 
-void littleEndianInt32ToBytes(uint32_t val, uint8_t bytes[]) {
+void bigEndianInt32ToBytes(uint32_t val, uint8_t bytes[]) {
     for(int i=3;i>=0;i--){
         bytes[i] = val & 0xFF;
         val = val >> 8;
     }
 }
 
-uint32_t littleEndianByteToInt32(const uint8_t bytes[]){
+uint32_t bigEndianByteToInt32(const uint8_t bytes[]){
     uint32_t ret=0;
     for(int i=0;i<4;i++){
         ret = (ret<<8) | bytes[i];

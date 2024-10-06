@@ -63,7 +63,7 @@ void BNode::setPtr(uint16_t idx, uint64_t ptr) {
     assert(idx<nkeys && idx>=0);
     uint16_t pos = HEADER_SIZE + idx*POINTER_ARRAY_ELEMENT_SIZE +
             nkeys*OFFSET_ARRAY_ELEMENT_SIZE;
-    littleEndianInt64ToBytes(ptr, data + pos);
+    bigEndianInt64ToBytes(ptr, data + pos);
 }
 
 uint16_t BNode::kvPos(uint16_t idx) {

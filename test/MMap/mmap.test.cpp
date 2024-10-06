@@ -113,6 +113,7 @@ class MMapTest {
         mmap.freeList->maxSeq=1;
         data = new uint8_t [16384];
         mu_assert( "Insert in freed page",mmap.insert(data)==ptr);
+        std::remove(filePath);
         return nullptr;
     }
 
