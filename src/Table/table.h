@@ -38,13 +38,13 @@ public:
 };
 
 class IntRecord: public Record{
-    int value;
+    uint32_t value;
 public:
     explicit IntRecord(int value);
+    explicit IntRecord(uint8_t *);
     uint32_t lengthInBytes() override;
     uint32_t convertToBytes(uint8_t *) override;
     RecordType getType() override;
-    explicit IntRecord(uint8_t *);
     std::string toString() override;
     [[nodiscard]] int toInt() const;
 };

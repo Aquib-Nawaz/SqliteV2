@@ -57,16 +57,46 @@ static const char * littleEndianInt64ToBytesTest(){
     return nullptr;
 }
 
+static const char * bigEndianInt32ToBytesTest(){
+    uint32_t val = 0x01020304;
+    uint8_t byte[4] = {0x00, 0x00, 0x00, 0x00};
+    bigEndianInt32ToBytes(val, byte);
+    mu_assert("error in bigEndianInt32ToBytes cond 1", byte[0] == 0x01 && byte[1] == 0x02 && byte[2] == 0x03 && byte[3] == 0x04);
+    mu_assert("bigEndianByteToInt32", bigEndianByteToInt32(byte) == val);
+    return nullptr;
+}
+
+static const char* bigEndianOrderTest(){
+    int act = -342;
+    uint32_t a = act;
+    a+=1<<31;
+    mu_assert("error in bigEndianOrderTest less than zero", a<1<<31);
+    int x = a;
+    x+=1<<31;
+    mu_assert("error in bigEndianOrderTest conversion", x==act);
+
+    int act2 = 342;
+    uint32_t a2 = act2;
+    a2+=1<<31;
+    mu_assert("error in bigEndianOrderTest greater than zero", a2>1<<31);
+    int x2 = a2;
+    x2+=1<<31;
+    mu_assert("error in bigEndianOrderTest conversion", x2==act2);
+    return nullptr;
+}
+
 static const char* all_tests(){
     mu_run_test(littleEndianByteToInt16Test);
     mu_run_test(littleEndianInt16ToBytesTest);
     mu_run_test(littleEndianByteToInt64Test);
     mu_run_test(littleEndianInt64ToBytesTest);
+    mu_run_test(bigEndianInt32ToBytesTest);
+    mu_run_test(bigEndianOrderTest);
     return nullptr;
 }
 
 
-int main(int argc , char* argv[]){
+int main(){
 
     const char * result = all_tests();
     printf("Executing test file: %s\n", __FILE_NAME__);

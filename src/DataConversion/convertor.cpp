@@ -35,3 +35,14 @@ uint32_t littleEndianByteToInt32(const uint8_t bytes[]){
 void littleEndianInt32ToBytes(uint32_t val, uint8_t bytes[]) {
     memcpy(bytes, &val, 4);
 }
+
+void bigEndianInt32ToBytes(uint32_t val, uint8_t bytes[]) {
+    bytes[0] = (val >> 24) & 0xFF;
+    bytes[1] = (val >> 16) & 0xFF;
+    bytes[2] = (val >> 8) & 0xFF;
+    bytes[3] = val & 0xFF;
+}
+
+uint32_t bigEndianByteToInt32(const uint8_t bytes[]) {
+    return (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3];
+}

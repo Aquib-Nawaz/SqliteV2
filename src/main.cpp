@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cassert>
 class A{
 public:
     int * d;
@@ -34,8 +35,9 @@ public:
 };
 int main() {
     // Write C++ code here
-    class A a(0);
-    a=std::move(a);
-    printf("a reinitialized\n");
+    int a= -2;
+    uint32_t b = a;
+    b+=1<<31;
+
     return 0;
 }

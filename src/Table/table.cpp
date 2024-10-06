@@ -55,11 +55,11 @@ IntRecord::IntRecord(int _val):value(_val){
 }
 
 IntRecord::IntRecord(uint8_t *byte) {
-    value= littleEndianByteToInt32(byte);
+    value= bigEndianByteToInt32(byte)+(1<<31);
 }
 
 uint32_t IntRecord::convertToBytes(uint8_t * bytes) {
-    littleEndianInt32ToBytes(value, bytes);
+    bigEndianInt32ToBytes(value+(1<<31), bytes);
     return lengthInBytes();
 }
 
