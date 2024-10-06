@@ -31,7 +31,7 @@ uint64_t LNode::getNext(){
 }
 
 void LNode::setNext(uint64_t next){
-    littleEndianInt64ToBytes(next,data);
+    bigEndianInt64ToBytes(next, data);
 }
 
 uint64_t LNode::getPtr(uint16_t pos){
@@ -39,7 +39,7 @@ uint64_t LNode::getPtr(uint16_t pos){
 }
 
 void LNode::setPtr(uint16_t pos,uint64_t ptr){
-    littleEndianInt64ToBytes(ptr,data+pos*8+FREE_LIST_HEADER);
+    bigEndianInt64ToBytes(ptr, data + pos * 8 + FREE_LIST_HEADER);
 }
 
 LNode::~LNode(){
@@ -197,17 +197,17 @@ uint8_t* MMapChunk:: getMetaData(){
     uint8_t *cur = data;
     memcpy(cur, DB_VERSION, strlen(DB_VERSION));
     cur+=strlen(DB_VERSION);
-    littleEndianInt64ToBytes(root, cur);
+    bigEndianInt64ToBytes(root, cur);
     cur+=sizeof root;
-    littleEndianInt64ToBytes(flushed, cur);
+    bigEndianInt64ToBytes(flushed, cur);
     cur+=sizeof flushed;
-    littleEndianInt64ToBytes(freeList->headPage, cur);
+    bigEndianInt64ToBytes(freeList->headPage, cur);
     cur+=sizeof freeList->headPage;
-    littleEndianInt64ToBytes(freeList->headSeq, cur);
+    bigEndianInt64ToBytes(freeList->headSeq, cur);
     cur+=sizeof freeList->headSeq;
-    littleEndianInt64ToBytes(freeList->tailPage, cur);
+    bigEndianInt64ToBytes(freeList->tailPage, cur);
     cur+=sizeof freeList->tailPage;
-    littleEndianInt64ToBytes(freeList->tailSeq, cur);
+    bigEndianInt64ToBytes(freeList->tailSeq, cur);
     return data;
 }
 

@@ -55,11 +55,11 @@ IntRecord::IntRecord(int _val):value(_val){
 }
 
 IntRecord::IntRecord(uint8_t *byte) {
-    value=littleEndianByteToInt32(byte);
+    value= bigEndianByteToInt32(byte);
 }
 
 uint32_t IntRecord::convertToBytes(uint8_t * bytes) {
-    littleEndianInt32ToBytes(value, bytes);
+    bigEndianInt32ToBytes(value, bytes);
     return lengthInBytes();
 }
 
@@ -80,7 +80,7 @@ std::string IntRecord::toString() {
 }
 
 TableDef::TableDef(uint8_t * key , uint8_t * val) {
-    prefix = littleEndianByteToInt32(val);
+    prefix = bigEndianByteToInt32(val);
     uint32_t offset=4;
     pKey = littleEndianByteToInt16(val + offset);
     offset+=2;
@@ -115,7 +115,7 @@ uint32_t TableDef::valueLength() {
 std::vector<uint8_t> TableDef::getValue() {
     uint32_t offset = 0;
     std::vector<uint8_t> bytes(valueLength());
-    littleEndianInt32ToBytes(prefix, bytes.data() + offset);
+    bigEndianInt32ToBytes(prefix, bytes.data() + offset);
     offset += 4;
     littleEndianInt16ToBytes(pKey, bytes.data() + offset);
     offset += 2;
@@ -132,7 +132,7 @@ std::vector<uint8_t> TableDef::getValue() {
 
 std::vector<uint8_t> TableDef::getKey() {
     std::vector<uint8_t> bytes(keyLength());
-    littleEndianInt32ToBytes(1, bytes.data());
+    bigEndianInt32ToBytes(1, bytes.data());
     StringRecord(name.c_str(), name.length()).convertToBytes(bytes.data()+4);
     return bytes;
 }
@@ -160,7 +160,7 @@ Row:: Row(std::vector<uint8_t> &key, std::vector<uint8_t> &val, TableDef &tableD
     uint8_t * data = key.data();
     for(uint16_t i=0;i<numColumns;i++){
         if(tableDef.types[i] == RECORD_INT){
-            value.push_back(new IntRecord(littleEndianByteToInt32(data + offset)));
+            value.push_back(new IntRecord(bigEndianByteToInt32(data + offset)));
             offset += 4;
         }else if(tableDef.types[i] == RECORD_STRING){
             value.push_back(new StringRecord(data+offset, true));
@@ -217,7 +217,7 @@ void Row::populateValue(TableDef &tableDef, std::vector<uint8_t> &val) {
     uint8_t *data = val.data();
     for(int i=tableDef.pKey;i<(int)tableDef.columnNames.size();i++){
         if(tableDef.types[i] == RECORD_INT){
-            value.push_back(new IntRecord(littleEndianByteToInt32(data+offset)));
+            value.push_back(new IntRecord(bigEndianByteToInt32(data + offset)));
             offset += 4;
         }else if(tableDef.types[i] == RECORD_STRING){
             value.push_back(new StringRecord(data+offset, true));
@@ -246,7 +246,7 @@ uint32_t Row::valueLength(TableDef &def) {
 
 std::vector<uint8_t> Row::getKey(TableDef &tableDef) {
     std::vector<uint8_t> bytes(keyLength(tableDef));
-    littleEndianInt32ToBytes(tableDef.prefix, bytes.data());
+    bigEndianInt32ToBytes(tableDef.prefix, bytes.data());
     uint32_t offset = 4;
     for(int i=0;i<tableDef.pKey;i++){
         offset += value[i]->convertToBytes(bytes.data()+offset);
