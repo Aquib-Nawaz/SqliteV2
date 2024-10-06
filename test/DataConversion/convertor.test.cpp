@@ -85,6 +85,14 @@ static const char* bigEndianOrderTest(){
     return nullptr;
 }
 
+static const char * uintToIntTest(){
+    int a = -2323,c;
+    uint32_t b = a;
+    c=b;
+    mu_assert("values should be equal", c==a);
+    return nullptr;
+}
+
 static const char* all_tests(){
     mu_run_test(littleEndianByteToInt16Test);
     mu_run_test(littleEndianInt16ToBytesTest);
@@ -92,6 +100,7 @@ static const char* all_tests(){
     mu_run_test(littleEndianInt64ToBytesTest);
     mu_run_test(bigEndianInt32ToBytesTest);
     mu_run_test(bigEndianOrderTest);
+    mu_run_test(uintToIntTest);
     return nullptr;
 }
 
