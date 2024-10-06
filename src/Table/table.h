@@ -19,6 +19,7 @@ public:
     virtual uint32_t lengthInBytes()=0;
     virtual uint32_t convertToBytes(uint8_t *)=0;
     virtual RecordType getType()=0;
+    virtual std::string toString()=0;
     virtual ~Record()=default;
 };
 
@@ -28,11 +29,11 @@ class StringRecord: public Record{
     uint32_t len;
 public:
     StringRecord(const char* _value, uint32_t len, bool copy=false);
-    explicit StringRecord(uint8_t *, bool copy=false);
+    StringRecord(uint8_t *, bool copy=false);
     uint32_t lengthInBytes() override;
     uint32_t convertToBytes(uint8_t *) override;
     RecordType getType() override;
-    std::string toString();
+    std::string toString() override;
     ~StringRecord() override;
 };
 
@@ -44,6 +45,7 @@ public:
     uint32_t convertToBytes(uint8_t *) override;
     RecordType getType() override;
     explicit IntRecord(uint8_t *);
+    std::string toString() override;
     [[nodiscard]] int toInt() const;
 };
 class Row;
@@ -68,11 +70,12 @@ class TableDef {
 };
 
 class Row{
-    std::vector<std::string> cols;
-    std::vector<Record*> value;
+
     uint32_t keyLength(TableDef &);
     uint32_t valueLength(TableDef &);
 public:
+    std::vector<std::string> cols;
+    std::vector<Record*> value;
     Row()=default;
     Row (std::vector<uint8_t> &key, std::vector<uint8_t> &val, TableDef &tableDef);
     Row (std::vector<std::string>, std::vector<Record*>);
@@ -82,7 +85,6 @@ public:
     std::vector<uint8_t> getKey(TableDef &tableDef);
     std::vector<uint8_t> getValue(TableDef &tableDef);
     ~Row();
-
 };
 
 
