@@ -52,10 +52,10 @@ class Row;
 // | 4B prefix | 2B pKey| 2B numRecords | recordType | columnName
 class TableDef {
     std::vector<RecordType> types;
-    std::vector<std::string>columnNames;
+    std::vector<std::string> columnNames;
     public:
     std::string  name;
-    uint32_t prefix;
+    int prefix;
     uint16_t pKey;
     TableDef()=default;
     TableDef(uint8_t *, uint8_t *);

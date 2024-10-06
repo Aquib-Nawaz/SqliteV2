@@ -72,7 +72,7 @@ RecordType IntRecord::getType() {
 }
 
 int IntRecord::toInt() const {
-    return value;
+    return (int)value;
 }
 
 std::string IntRecord::toString() {
