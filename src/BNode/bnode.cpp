@@ -6,7 +6,7 @@
 #include <cassert>
 #include "../DataConversion/convertor.h"
 
-BNode::BNode(uint8_t nm) {
+BNode::BNode(uint8_t nm, bool _destroy): destroy(_destroy) {
     data = new uint8_t[BTREE_PAGE_SIZE*nm];
 }
 
@@ -14,7 +14,7 @@ void BNode::resetData(){
     data = nullptr;
 }
 
-BNode::BNode(uint8_t * _data){
+BNode::BNode(uint8_t * _data, bool _destroy):destroy(_destroy){
     data = _data;
     btype = littleEndianByteToInt16(data);
     nkeys = littleEndianByteToInt16(data + 2);
@@ -182,5 +182,6 @@ uint8_t* BNode::getData() {
     return data;
 }
 BNode::~BNode() {
-    delete[] data;
+    if(destroy)
+        delete[] data;
 }

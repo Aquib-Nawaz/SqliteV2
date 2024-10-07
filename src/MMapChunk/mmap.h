@@ -41,7 +41,7 @@ class MMapChunk{
     uint64_t nAppend;
     uint64_t flushed;
     FList* freeList;
-    std::unordered_map<uint64_t, uint8_t*> pagesToSet;
+    std::unordered_map<uint64_t, std::pair<uint8_t*, bool>> pagesToSet;
     void extendMMap(long long);
     long long size;
     void pushBack(uint64_t );

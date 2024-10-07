@@ -34,7 +34,7 @@ class MMapTest {
         for(uint8_t i=0;i<0xFF;i++){
             mu_assert("Key Match", data[i]==i);
         }
-        delete[] data;
+//        delete[] data;
         return nullptr;
     }
 
@@ -46,7 +46,7 @@ class MMapTest {
         for(uint8_t i=0;i<0xFF;i++){
             mu_assert_iter(i,"Key Match", data[i]==i);
         }
-        delete data;
+//        delete []data;
         std::remove(fileName);
         return nullptr;
     }

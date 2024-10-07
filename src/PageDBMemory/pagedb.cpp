@@ -40,7 +40,7 @@ uint64_t DiskPageDBMemory::insert(BNode * node) {
 
 BNode *DiskPageDBMemory::get(uint64_t ptr) {
     auto data = mmapChunk->get(ptr);
-    return new BNode(data);
+    return new BNode(data, false);
 }
 void DiskPageDBMemory::del(uint64_t ptr) {
     mmapChunk->del(ptr);

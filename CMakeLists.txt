@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.26)
 project(SqliteV2)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_OSX_ARCHITECTURES "arm64")
 
 add_subdirectory(src/DataConversion)
 add_subdirectory(src/BNode)
@@ -15,7 +16,6 @@ add_subdirectory(src/DB)
 enable_testing()
 add_library(SqliteV2_compiler_flags INTERFACE)
 target_compile_features(SqliteV2_compiler_flags INTERFACE cxx_std_11)
-
 # add compiler warning flags just when building this project via
 # the BUILD_INTERFACE genex
 set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>")

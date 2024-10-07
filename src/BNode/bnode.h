@@ -26,10 +26,11 @@ class BNode {
     uint64_t btype, nkeys;
     static uint16_t offsetPos(uint16_t);
     uint8_t *data;
+    bool destroy;
 public:
-    explicit BNode(uint8_t);
+    explicit BNode(uint8_t, bool destroy = true);
+    explicit BNode(uint8_t *, bool destroy = true);
     void resetData();
-    explicit BNode(uint8_t *);
     uint8_t* getData();
     [[nodiscard]] uint16_t bType() const;
     [[nodiscard]] uint16_t nKeys() const;

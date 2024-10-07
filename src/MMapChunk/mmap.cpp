@@ -62,8 +62,8 @@ int createFileSync(const char * filepath){
 }
 
 void MMapChunk::clearPendingUpdates() {
-    for(auto i : pagesToSet){
-        delete i.second;
+    for(auto &i : pagesToSet){
+        delete[] i.second.first;
     }
 }
 
@@ -123,11 +123,12 @@ MMapChunk::MMapChunk(const char * _path) {
 uint64_t MMapChunk::insert(uint8_t * data) {
     uint64_t ptr = popFront();
     if(ptr != 0){
-        pagesToSet[ptr] = data;
+        assert(pagesToSet.count(ptr)==0);
+        pagesToSet[ptr] = {data, true};
         return ptr;
     }
     ptr = flushed+nAppend++;
-    pagesToSet[ptr]=data;
+    pagesToSet[ptr]={data, true};
     return ptr;
 }
 
@@ -143,9 +144,12 @@ std::pair<size_t, uint64_t > MMapChunk::getPtrLocation(uint64_t  ptr){
 
 uint8_t * MMapChunk::get(uint64_t ptr) {
     assert(ptr < flushed);
+    if(pagesToSet.count(ptr))
+        return pagesToSet[ptr].first;
     auto [chunkNum,offset] = getPtrLocation(ptr);
     auto *data = new uint8_t [BTREE_PAGE_SIZE];
     memcpy(data ,chunks[chunkNum].first+offset,BTREE_PAGE_SIZE);
+    pagesToSet[ptr]={data, false};
     return data;
 }
 
@@ -161,9 +165,12 @@ int MMapChunk::writePages() {
     long long _size = (long long)(flushed+nAppend)*BTREE_PAGE_SIZE;
     extendMMap(_size);
 
-    for(auto it:pagesToSet){
+    for(auto &it:pagesToSet){
+        if(!it.second.second)
+            continue;
+        it.second.second=false;
         auto [chunk, chunkOffset] = getPtrLocation(it.first);
-        memcpy(chunks[chunk].first+chunkOffset,it.second,BTREE_PAGE_SIZE);
+        memcpy(chunks[chunk].first+chunkOffset,it.second.first,BTREE_PAGE_SIZE);
         int ret = msync(chunks[chunk].first+chunkOffset, BTREE_PAGE_SIZE, MS_SYNC);
         RETURN_ON_ERROR(ret, "MSYNC updatePages")
     }
@@ -183,12 +190,10 @@ int MMapChunk::updateFile() {
 
 int MMapChunk::updateRoot() {
     auto metadata = getMetaData();
-//    OUTPUT_ERROR( write(fd, metadata, strlen(DB_VERSION)+48), "write updateRoot")
     memcpy(chunks[0].first, metadata, strlen(DB_VERSION)+48);
     int ret = msync(chunks[0].first, strlen(DB_VERSION)+48, MS_SYNC);
     RETURN_ON_ERROR(ret, "MSYNC updateRoot")
     delete[] metadata;
-//    OUTPUT_ERROR( fsync(fd), "fsync updateRoot")
     return 0;
 }
 
@@ -213,9 +218,11 @@ uint8_t* MMapChunk:: getMetaData(){
 
 int MMapChunk::updateOrRevert(uint8_t * curMetaData) {
     int err = updateFile();
-    clearPendingUpdates();
-    pagesToSet.clear();
+//    clearPendingUpdates();
+//    pagesToSet.clear();
     if(err){
+        clearPendingUpdates();
+        pagesToSet.clear();
         loadMeta(curMetaData);
     }
     return err;
@@ -240,16 +247,15 @@ void MMapChunk::del(uint64_t ptr) {
     assert(ptr<flushed);
     pushBack(ptr);
     if(pagesToSet.count(ptr)){
-        delete [] pagesToSet[ptr];
+        delete [] pagesToSet[ptr].first;
         pagesToSet.erase(ptr);
     }
 }
 
 uint8_t * MMapChunk::set(uint64_t ptr) {
-    if(pagesToSet.count(ptr)!=0){
-        return pagesToSet[ptr];
-    }
-    return pagesToSet[ptr] = get(ptr);
+    auto data = get(ptr);
+    pagesToSet[ptr].second = true;
+    return data;
 }
 
 std::pair<uint64_t,uint64_t> MMapChunk::popHead(){
@@ -273,7 +279,7 @@ std::pair<uint64_t,uint64_t> MMapChunk::popHead(){
 uint64_t  MMapChunk::popFront(){
     auto ret = popHead();
     if(ret.second != 0){
-        pushBack(ret.second);
+        del(ret.second);
     }
     return ret.first;
 }
@@ -296,6 +302,11 @@ void MMapChunk::pushBack(uint64_t ptr) {
             LNode node2(set(ret.first));
             node2.setPtr(seq2Idx(freeList->tailSeq++), ret.second);
             node2.resetData();
+            //delete from pagesToSet
+            if(pagesToSet.count(ret.second)){
+                delete [] pagesToSet[ret.second].first;
+                pagesToSet.erase(ret.second);
+            }
         }
     }
     node.resetData();
