@@ -23,14 +23,18 @@ void BTreeIterator::iterNext(bool dir) {
             iterNext(dir); //See if parents have sibling
             if(!_stack.empty()){
                 uint16_t idx = dir?0:_stack.top().first->nKeys()-1;
-                _stack.emplace(_btree->get(_stack.top().first->getPtr(idx)), idx);
+                _stack.emplace(_btree->get(_stack.top().first->getPtr(_stack.top().second)), idx);
             }
         }
     }
 }
 
 bool BTreeIterator::valid() {
-    return !_stack.empty() && _stack.top().first->bType() == BTREE_LEAF;
+    if(_stack.empty() || _stack.top().first->bType() != BTREE_LEAF)
+        return false;
+    if(_stack.top().second==0 && _stack.top().first->getKey(0).empty())
+        return false;
+    return true;
 }
 
 void BTreeIterator::next() {

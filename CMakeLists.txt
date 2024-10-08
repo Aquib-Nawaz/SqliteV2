@@ -31,4 +31,5 @@ add_subdirectory(test/BTree)
 add_subdirectory(test/MMap)
 add_subdirectory(test/Table)
 add_subdirectory(test/DB)
+add_subdirectory(test/BTreeIterator)
 
