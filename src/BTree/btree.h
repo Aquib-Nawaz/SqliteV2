@@ -12,8 +12,9 @@
 
 #define BTREE_MAX_KEY_SIZE 4000
 #define BTREE_MAX_VAL_SIZE 12000
-
+class BTreeIterator;
 class BTree {
+    friend class BTreeIterator;
     virtual BNode * get(uint64_t)=0;
     virtual void del(uint64_t)=0;
     virtual uint64_t insert(BNode*)=0;
