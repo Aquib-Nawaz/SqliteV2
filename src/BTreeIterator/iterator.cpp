@@ -10,6 +10,8 @@ BTreeIterator::BTreeIterator(BTree *btree) {
 }
 
 void BTreeIterator::iterNext(bool dir) {
+    if(_stack.empty())
+        return;
     BNode* node = _stack.top().first;
     uint16_t index = _stack.top().second;
     _stack.pop();
