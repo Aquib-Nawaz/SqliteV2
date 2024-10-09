@@ -27,6 +27,7 @@ class BNode {
     static uint16_t offsetPos(uint16_t);
     uint8_t *data;
     bool destroy;
+    uint16_t pointerLocation(uint16_t) const;
 public:
     explicit BNode(uint8_t, bool destroy = true);
     explicit BNode(uint8_t *, bool destroy = true);

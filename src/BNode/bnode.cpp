@@ -54,21 +54,23 @@ void BNode::setOffset( uint16_t idx, uint16_t offset){
 
 uint64_t BNode::getPtr(uint16_t idx) {
     assert(idx<nkeys && idx>=0);
-    uint16_t pos = HEADER_SIZE + idx*POINTER_ARRAY_ELEMENT_SIZE +
-            nkeys*OFFSET_ARRAY_ELEMENT_SIZE;
+    uint16_t pos = pointerLocation(idx);
     return littleEndianByteToInt64(data + pos);
 }
 
 void BNode::setPtr(uint16_t idx, uint64_t ptr) {
     assert(idx<nkeys && idx>=0);
-    uint16_t pos = HEADER_SIZE + idx*POINTER_ARRAY_ELEMENT_SIZE +
-            nkeys*OFFSET_ARRAY_ELEMENT_SIZE;
+    uint16_t pos = pointerLocation(idx);
     littleEndianInt64ToBytes(ptr, data + pos);
 }
 
 uint16_t BNode::kvPos(uint16_t idx) {
     return HEADER_SIZE + (btype==BTREE_LEAF?0:nkeys*POINTER_ARRAY_ELEMENT_SIZE) +
     nkeys*OFFSET_ARRAY_ELEMENT_SIZE + getOffset(idx);
+}
+
+uint16_t BNode::pointerLocation(uint16_t idx) const {
+    return HEADER_SIZE + idx*POINTER_ARRAY_ELEMENT_SIZE+nkeys*OFFSET_ARRAY_ELEMENT_SIZE;
 }
 
 std::vector<uint8_t> BNode::getKey(uint16_t idx) {
@@ -148,9 +150,9 @@ void BNode::nodeAppendRange(BNode* oldNode,  uint16_t destStart, uint16_t start,
         setOffset(destStart+i, oldNode->getOffset(start+i) + offSetOffSet);
     }
     if(bType() == BTREE_INTERIOR) {
-        for (uint16_t i = 0; i < num; ++i) {
-            setPtr(destStart+i, oldNode->getPtr(start+i));
-        }
+        uint16_t destPtrStart = pointerLocation(destStart);
+        uint16_t srcPtrStart = oldNode->pointerLocation(start);
+        memcpy(data+destPtrStart ,oldNode->data+srcPtrStart , num*POINTER_ARRAY_ELEMENT_SIZE);
     }
 }
 

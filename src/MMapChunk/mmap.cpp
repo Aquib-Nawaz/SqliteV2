@@ -146,6 +146,14 @@ uint8_t * MMapChunk::get(uint64_t ptr) {
     assert(ptr < flushed);
     if(pagesToSet.count(ptr))
         return pagesToSet[ptr].first;
+    if(pagesToSet.size()>MAX_PAGESTOSET_SIZE){
+        for(auto &it:pagesToSet){
+            if(!it.second.second){
+                delete [] it.second.first;
+                pagesToSet.erase(it.first);
+            }
+        }
+    }
     auto [chunkNum,offset] = getPtrLocation(ptr);
     auto *data = new uint8_t [BTREE_PAGE_SIZE];
     memcpy(data ,chunks[chunkNum].first+offset,BTREE_PAGE_SIZE);

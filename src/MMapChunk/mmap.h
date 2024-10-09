@@ -16,7 +16,7 @@
 #define FREE_LIST_CAPACITY ((FREE_LIST_PAGE_SIZE-FREE_LIST_HEADER)/8)
 #define OUTPUT_ERROR(x,y) do{if((x)==-1){perror(y);exit(1);}}while(0);
 #define RETURN_ON_ERROR(x,y)do{if((x)<0){perror(y);return x;}}while(0);
-
+#define MAX_PAGESTOSET_SIZE 64
 class MMapTest;
 class MMapChunk;
 
