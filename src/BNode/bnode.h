@@ -160,36 +160,36 @@ public:
     /**
      * \brief Appends a range of key-value pairs to the node.
      * \param srcNode Source node to append from.
-     * \param srcPos Source position to append from.
-     * \param destPos Destination position to append to.
+     * \param destIdx Destination index to append to.
+     * \param srcIdx Source idex to append from.
      * \param count Number of key-value pairs to append.
      */
-    void nodeAppendRange(BNode* srcNode, uint16_t destPos, uint16_t srcPos, uint16_t count);
+    void nodeAppendRange(BNode* srcNode, uint16_t destIdx, uint16_t srcIdx, uint16_t count);
 
     /**
      * \brief Appends a key-value pair to the node.
-     * \param pos Position to append the key-value pair at.
+     * \param idx Index to append the key-value pair at.
      * \param key Key to append.
      * \param val Value to append.
-     * \param ptr Pointer to append (default is 0).
+     * \param ptr Pointer in case of InteriorNode.
      */
-    void nodeAppendKV(uint16_t pos, std::vector<uint8_t> &key, std::vector<uint8_t> &val, uint64_t ptr = 0);
+    void nodeAppendKV(uint16_t idx, std::vector<uint8_t> &key, std::vector<uint8_t> &val, uint64_t ptr = 0);
 
     /**
-     * \brief Inserts or Update a key-value pair into the leaf node.
+     * \brief Inserts or Update a key-value pair into leaf node and copies the data in curnode.
      * \param srcNode Source node to insert from.
-     * \param pos Position to insert the key-value pair at.
+     * \param idx Index to insert the key-value pair at.
      * \param key Key to insert.
      * \param val Value to insert.
      */
-    void leafInsert(BNode* srcNode, uint16_t pos, std::vector<uint8_t> &key, std::vector<uint8_t> &val);
+    void leafInsert(BNode* srcNode, uint16_t idx, std::vector<uint8_t> &key, std::vector<uint8_t> &val);
 
     /**
-     * \brief Deletes a key-value pair from the leaf node.
-     * \param srcNode Source node to delete from.
-     * \param pos Position to delete the key-value pair from.
+     * \brief Deletes a key-value pair from the leaf node and insert the remaining data in current node.
+     * \param srcNode Original node to delete from.
+     * \param idx Index of original node to delete the key-value pair from.
      */
-    void leafDelete(BNode* srcNode, uint16_t pos);
+    void leafDelete(BNode* srcNode, uint16_t idx);
 
     /**
      * \brief Destructor for BNode.
