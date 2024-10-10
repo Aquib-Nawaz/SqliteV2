@@ -5,8 +5,10 @@ This project is a Key Value Store implemented in C++ that can be extended to sto
 ## Features
 
 - **Key-Value Storage**: Basic key-value storage functionality.
+- **Persistence and Resilience**: Data is persisted in a file and has robust recovery system in case of crash.
 - **Relational Table Format**: Extendable to store data in a relational table format.
 - **Secondary Indexing**: Support for secondary indexes to improve query performance.
+- **Iterator over range**: Have functionality of iterating over data stored.
 - **Concurrent Actions**: Work in progress to support concurrent actions.
 - **Command Conversion**: Work in progress to support conversion from command.
 
