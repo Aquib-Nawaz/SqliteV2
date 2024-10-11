@@ -18,9 +18,11 @@ static const char * BTreeIterator_initialization() {
     BTreeIterator it(btree);
     mu_assert("Iterator should be invalid initially", !it.valid());
     std::vector<uint8_t> key(1);
+    UpdateResult res;
+    res.type = UPDATE_INSERT;
     for(int i=0;i<10;i++){
         key[0] = i;
-        btree->Insert(key, key);
+        btree->Insert(key, key, res);
     }
     key[0] = 5;
     it.seekLE(key);
@@ -38,10 +40,13 @@ static const char * BTreeLessThan(){
     BTree *btree = new DiskPageDBMemory(&chunk);
     BTreeIterator it(btree);
     std::vector<uint8_t> key(1);
+    UpdateResult res;
+    res.type = UPDATE_INSERT;
+
     for(int i=0;i<10;i++){
         if(i==5)continue;
         key[0] = i;
-        btree->Insert(key, key);
+        btree->Insert(key, key, res);
     }
     key[0] = 5;
     it.seekLE(key);
@@ -58,9 +63,11 @@ static const char* BTreeIterator_next(){
     BTree *btree = new DiskPageDBMemory(&chunk);
     BTreeIterator it(btree);
     std::vector<uint8_t> key(1);
+    UpdateResult res;
+    res.type = UPDATE_INSERT;
     for(int i=0;i<10;i++){
         key[0] = i;
-        btree->Insert(key, key);
+        btree->Insert(key, key, res);
     }
     key[0] = 2;
     it.seekLE(key);
@@ -82,9 +89,12 @@ static const char* BTreeIterator_prev(){
     BTree *btree = new DiskPageDBMemory(&chunk);
     BTreeIterator it(btree);
     std::vector<uint8_t> key(1);
+    UpdateResult res;
+    res.type = UPDATE_INSERT;
+
     for(int i=0;i<10;i++){
         key[0] = i;
-        btree->Insert(key, key);
+        btree->Insert(key, key, res);
     }
     key[0] = 8;
     it.seekLE(key);
@@ -107,9 +117,12 @@ static const char * BTreeMultiLevelTreeTest(){
     BTreeIterator it(btree);
     std::vector<uint8_t> key(4);
     int numKeys = 10000;
+    UpdateResult res;
+    res.type = UPDATE_INSERT;
+
     for(int i=0;i<numKeys;i++){
         bigEndianInt32ToBytes(i, key.data());
-        btree->Insert(key, key);
+        btree->Insert(key, key, res);
     }
     bigEndianInt32ToBytes(500, key.data());
     it.seekLE(key);

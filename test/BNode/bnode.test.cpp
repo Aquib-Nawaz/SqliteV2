@@ -98,8 +98,11 @@ static const char* leafInsertTest() {
     }
     BNode newNode(1);
     data[0]=5;
-    newNode.leafInsert(&bnode, 4, data, v);
+    UpdateResult res;
+    res.type = UPDATE_INSERT;
+    newNode.leafInsert(&bnode, 4, data, v ,res);
     mu_assert("Size Match", newNode.nKeys() == 10);
+    mu_assert("Key Inserted", res.added&&!res.updated);
     for(int i=0;i<10;i++){
         data[0] = i;
         mu_assert("key mismatch", newNode.getKey(i) == data);

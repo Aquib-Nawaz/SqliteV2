@@ -45,30 +45,35 @@ bool DB::CreateTable(TableDef &tableDef) {
     }
     //Insert definition
     auto val = tableDef.getValue();
-    btree->Insert(key, val);
+    UpdateResult res;
+    res.type = UPDATE_INSERT;
+    btree->Insert(key, val, res);
 
     //Update prefix in meta table
     std::string updatedPrefix = std::to_string(tableDef.prefix+1+tableDef.getIndex().size());
     row.pushRow(metaVal, new StringRecord(updatedPrefix.c_str(), updatedPrefix.size()));
     auto updatedPrefixVal = row.getValue(Meta_Def);
-    btree->Insert(prefixKey, updatedPrefixVal);
+    res.type = UPDATE_UPDATE;
+    btree->Insert(prefixKey, updatedPrefixVal, res);
     return true;
 }
 
-bool DB::Insert(std::string &tableName, Row &row) {
+bool DB::Insert(std::string &tableName, Row &row, UpdateResult& res) {
     TableDef def;
     if(!getTable(tableName, def) || !row.checkAndReorder(def, false)) {
         return false;
     }
     auto key = row.getKey(def),
         val = row.getValue(def);
-    btree->Insert(key, val);
+    btree->Insert(key, val, res);
 
     //Insert index
-    std::vector<uint8_t>empty;
-    for(auto &indexKey: row.getIndexTableKeys(def)){
-        btree->Insert(indexKey, empty);
-    }
+//    UpdateResult temp;
+//    temp.type = UPDATE_INSERT;
+//    std::vector<uint8_t>empty;
+//    for(auto &indexKey: row.getIndexTableKeys(def)){
+//        btree->Insert(indexKey, empty, temp);
+//    }
     return true;
 }
 

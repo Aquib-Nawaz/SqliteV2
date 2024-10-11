@@ -26,6 +26,28 @@ enum BTreeNodeType {
 };
 
 /**
+ * \enum UpdateType
+ * \brief Enum to represent the type of update operation.
+ */
+
+enum UpdateType {
+    UPDATE_INSERT = 0,
+    UPDATE_UPDATE = 1,
+    UPDATE_UPSERT = 2
+};
+
+/**
+ * \struct UpdateResult
+ * \brief Struct to represent the result of an update operation.
+ */
+struct UpdateResult {
+    std::vector<uint8_t> oldValue;
+    bool added;
+    bool updated;
+    UpdateType type;
+};
+
+/**
  * \class BNode
  * \brief Class representing a node in a B-Tree.
  */
@@ -181,8 +203,9 @@ public:
      * \param idx Index to insert the key-value pair at.
      * \param key Key to insert.
      * \param val Value to insert.
+     * \param result Result of the update operation.
      */
-    void leafInsert(BNode* srcNode, uint16_t idx, std::vector<uint8_t> &key, std::vector<uint8_t> &val);
+    void leafInsert(BNode* srcNode, uint16_t idx, std::vector<uint8_t> &key, std::vector<uint8_t> &val, UpdateResult& result);
 
     /**
      * \brief Deletes a key-value pair from the leaf node and insert the remaining data in current node.
@@ -190,6 +213,17 @@ public:
      * \param idx Index of original node to delete the key-value pair from.
      */
     void leafDelete(BNode* srcNode, uint16_t idx);
+
+    /**
+     * \brief Updates or inserts a key-value pair into the node.
+     * \param oldNode Original node to update or insert into.
+     * \param idx Index to update or insert at.
+     * \param key Key to update or insert.
+     * \param val Value to update or insert.
+     * \param update Flag to indicate if the operation is an update.
+     */
+    void updateOrInsert(BNode* oldNode, uint16_t idx, std::vector<uint8_t>&key,
+                               std::vector<uint8_t>&val, bool update);
 
     /**
      * \brief Destructor for BNode.

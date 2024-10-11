@@ -18,7 +18,7 @@ public:
     void del(uint64_t) override;
     uint64_t insert(BNode *) override;
     explicit DiskPageDBMemory(class MMapChunk*);
-    void Insert(std::vector<uint8_t> &, std::vector<uint8_t> &) override;
+    void Insert(std::vector<uint8_t> &, std::vector<uint8_t> &, UpdateResult&) override;
     std::vector<uint8_t> Get(std::vector<uint8_t> &) override;
     bool Delete(std::vector<uint8_t >&) override;
 };

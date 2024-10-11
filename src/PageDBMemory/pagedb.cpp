@@ -4,11 +4,12 @@
 
 #include "pagedb.h"
 
-void DiskPageDBMemory::Insert(std::vector<uint8_t> & key, std::vector<uint8_t> & val) {
+void DiskPageDBMemory::Insert(std::vector<uint8_t> & key, std::vector<uint8_t> & val,
+                              UpdateResult& res) {
     root = mmapChunk->getRoot();
     //tree root and memory root are in sync now
     auto meta = mmapChunk->getMetaData();
-    BTree::Insert(key, val);
+    BTree::Insert(key, val, res);
     //updated the memory root
     mmapChunk->setRoot(root);
     mmapChunk->updateOrRevert(meta);

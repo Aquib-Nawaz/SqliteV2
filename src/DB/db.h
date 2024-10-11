@@ -17,7 +17,7 @@ class DB {
 public:
     DB(MMapChunk*);
     bool CreateTable(TableDef&);
-    bool Insert(std::string &, Row&);
+    bool Insert(std::string &, Row&, UpdateResult&);
     bool Get(std::string&, Row&);
     bool Delete(std::string&, Row&);
     ~DB();

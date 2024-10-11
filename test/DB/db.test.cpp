@@ -26,7 +26,9 @@ static  const char* DBCreateTableTest(){
     Row row({"col1", "col2", "col3"},{new IntRecord(1),
                                       new StringRecord("Hello", 5),
                                       new IntRecord(2)});
-    mu_assert("DB::Insert", db.Insert(def.name, row));
+    UpdateResult res;
+    res.type = UPDATE_INSERT;
+    mu_assert("DB::Insert", db.Insert(def.name, row, res));
     Row row2;
     row2.pushRow("col1", new IntRecord(1));
     mu_assert("DB::Get", db.Get(def.name, row2));
@@ -59,7 +61,9 @@ static  const char* DBCreate2TableTest(){
     Row row({"col1", "col2", "col3"},{new IntRecord(1),
                                       new StringRecord("Hello", 5),
                                       new IntRecord(2)});
-    mu_assert("DB::Insert", db.Insert(table1, row));
+    UpdateResult res;
+    res.type = UPDATE_INSERT;
+    mu_assert("DB::Insert", db.Insert(table1, row, res));
     Row row2;
     row2.pushRow("col1", new IntRecord(1));
     mu_assert("DB::Get no match for table2", !db.Get(def.name, row2));

@@ -157,12 +157,32 @@ void BNode::nodeAppendRange(BNode* oldNode,  uint16_t destStart, uint16_t start,
 }
 
 void BNode::leafInsert( BNode* oldNode, uint16_t idx, std::vector<uint8_t>&key,
-                        std::vector<uint8_t>&val) {
-    bool skipOriginalKey = ( key == oldNode->getKey(idx));
-    _setHeader(BTREE_LEAF, oldNode->nKeys() + 1 - skipOriginalKey);
-    nodeAppendRange(oldNode, 0, 0, idx+1-skipOriginalKey);
-    nodeAppendKV(idx+1-skipOriginalKey, key, val);
-    nodeAppendRange(oldNode, idx+2-skipOriginalKey, idx + 1, oldNode->nKeys() - idx - 1);
+                        std::vector<uint8_t>&val, UpdateResult& result) {
+    bool keyPresent = ( key == oldNode->getKey(idx));
+    result.added = result.updated = false;
+    if(keyPresent) {
+        if(result.type == UPDATE_INSERT) {
+            return;
+        }
+        result.oldValue = oldNode->getVal(idx);
+        result.updated = true;
+        updateOrInsert(oldNode, idx, key, val, true);
+    }
+    else {
+        if(result.type == UPDATE_UPDATE) {
+            return;
+        }
+        result.added = true;
+        updateOrInsert(oldNode, idx, key, val, false);
+    }
+}
+
+void BNode::updateOrInsert(BNode* oldNode, uint16_t idx, std::vector<uint8_t>&key,
+                           std::vector<uint8_t>&val, bool update){
+    _setHeader(BTREE_LEAF, oldNode->nKeys() + 1 - update);
+    nodeAppendRange(oldNode, 0, 0, idx+1-update);
+    nodeAppendKV(idx+1-update, key, val);
+    nodeAppendRange(oldNode, idx+2-update, idx + 1, oldNode->nKeys() - idx - 1);
 }
 
 void BNode::shrink(uint16_t ns) {
