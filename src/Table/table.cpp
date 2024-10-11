@@ -223,8 +223,8 @@ bool TableDef::checkSanity() {
     return columnNames.size() >= pKey;
 }
 
-int TableDef::getIndexSize() const{
-    return (int)indexes.size();
+const std::vector<std::vector<std::string >>& TableDef::getIndex() {
+    return indexes;
 }
 
 Row:: Row(std::vector<uint8_t> &key, std::vector<uint8_t> &val, TableDef &tableDef){
@@ -336,7 +336,33 @@ std::vector<uint8_t> Row::getValue(TableDef &tableDef) {
     return bytes;
 }
 
+Record* Row::getRecord(const std::string &col)  {
+    for(int i=0;i<(int)cols.size();i++){
+        if(cols[i] == col){
+            return value[i];
+        }
+    }
+    return nullptr;
+}
 
+std::vector<std::vector<uint8_t>> Row::getIndexTableKeys(TableDef &def){
+    TableDef temp;
+    temp.prefix = def.prefix;
+    std::vector<std::vector<uint8_t>> ret;
+    for(auto &index: def.getIndex()) {
+        Row indexRow;
+        for(auto &col: index) {
+            indexRow.pushRow(col, getRecord(col));
+        }
+        for(int i =0;i<def.pKey;i++) {
+            indexRow.pushRow(def.columnNames[i], getRecord(def.columnNames[i]));
+        }
+        temp.pKey = index.size()+def.pKey;
+        ++temp.prefix;
+        ret.push_back(indexRow.getKey(temp));
+    }
+    return ret;
+}
 
 Row::~Row() {
     for(auto & val : value){

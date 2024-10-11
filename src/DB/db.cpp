@@ -48,7 +48,7 @@ bool DB::CreateTable(TableDef &tableDef) {
     btree->Insert(key, val);
 
     //Update prefix in meta table
-    std::string updatedPrefix = std::to_string(tableDef.prefix+1+tableDef.getIndexSize());
+    std::string updatedPrefix = std::to_string(tableDef.prefix+1+tableDef.getIndex().size());
     row.pushRow(metaVal, new StringRecord(updatedPrefix.c_str(), updatedPrefix.size()));
     auto updatedPrefixVal = row.getValue(Meta_Def);
     btree->Insert(prefixKey, updatedPrefixVal);
@@ -63,6 +63,12 @@ bool DB::Insert(std::string &tableName, Row &row) {
     auto key = row.getKey(def),
         val = row.getValue(def);
     btree->Insert(key, val);
+
+    //Insert index
+    std::vector<uint8_t>empty;
+    for(auto &indexKey: row.getIndexTableKeys(def)){
+        btree->Insert(indexKey, empty);
+    }
     return true;
 }
 
@@ -86,7 +92,13 @@ bool DB::Delete(std::string & tableName, Row & row) {
         return false;
     }
     auto key = row.getKey(def);
-    return btree->Delete(key);
+    bool ret = btree->Delete(key);
+    if(ret){
+        for(auto &indexKey: row.getIndexTableKeys(def)){
+            btree->Delete(indexKey);
+        }
+    }
+    return ret;
 }
 
 DB::~DB() {

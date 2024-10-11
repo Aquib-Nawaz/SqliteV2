@@ -12,6 +12,7 @@ add_subdirectory(src/MMapChunk)
 add_subdirectory(src/Table)
 add_subdirectory(src/DB)
 add_subdirectory(src/BTreeIterator)
+add_subdirectory(src/Scanner)
 add_subdirectory(src)
 
 enable_testing()

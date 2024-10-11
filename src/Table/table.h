@@ -51,12 +51,12 @@ public:
     [[nodiscard]] int toInt() const;
 };
 class Row;
-// | 4B prefix | 2B pKey| 2B numRecords | recordType | columnName
+// | 4B prefix | 2B pKey| 2B numRecords | recordType | columnName | numIndex | index1size|col
 class TableDef {
     std::vector<RecordType> types;
-    std::vector<std::string> columnNames;
     std::vector<std::vector<std::string>> indexes;
     public:
+    std::vector<std::string> columnNames;
     std::string  name;
     int prefix;
     uint16_t pKey;
@@ -70,7 +70,7 @@ class TableDef {
     std::vector<uint8_t> getKey() const;
     std::vector<uint8_t> getValue();
     bool checkSanity();
-    int getIndexSize()const;
+    const std::vector<std::vector<std::string >>& getIndex();
     friend class Row;
 };
 
@@ -89,6 +89,8 @@ public:
     void populateValue(TableDef &tableDef, std::vector<uint8_t> &val);
     std::vector<uint8_t> getKey(TableDef &tableDef);
     std::vector<uint8_t> getValue(TableDef &tableDef);
+    Record* getRecord(const std::string &col);
+    std::vector<std::vector<uint8_t>> getIndexTableKeys(TableDef &tableDef);
     ~Row();
 };
 
