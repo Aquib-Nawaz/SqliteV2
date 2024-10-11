@@ -123,6 +123,18 @@ TableDef::TableDef(uint8_t * key , uint8_t * val) {
         offset += temp.lengthInBytes();
         columnNames.push_back(temp.toString());
     }
+    uint16_t numIndexes = littleEndianByteToInt16(val+offset);
+    indexes.resize(numIndexes);
+    offset+=2;
+    for(int i=0;i<(int)numIndexes;i++){
+        uint16_t numCols = littleEndianByteToInt16(val+offset);
+        offset+=2;
+        for(int j=0;j<(int)numCols;j++){
+            StringRecord temp(val+offset);
+            offset += temp.lengthInBytes();
+            indexes[i].push_back(temp.toString());
+        }
+    }
     //IgnorePrefix
     name = StringRecord(key+4).toString();
     assert(checkSanity());
@@ -139,9 +151,15 @@ uint32_t TableDef::valueLength() {
     for(int i=0;i<(int)types.size();i++){
         ret+=StringRecord(columnNames[i].c_str(), columnNames[i].length()).lengthInBytes();
     }
+    ret+=2;
+    for(auto & index : indexes){
+        ret+=2;
+        for(const auto & j : index){
+            ret+=StringRecord(j.c_str(), j.length()).lengthInBytes();
+        }
+    }
     return ret;
 }
-
 
 std::vector<uint8_t> TableDef::getValue() {
     uint32_t offset = 0;
@@ -158,6 +176,15 @@ std::vector<uint8_t> TableDef::getValue() {
         offset += StringRecord(columnNames[i].c_str(), columnNames[i].length())
                 .convertToBytes(bytes.data()+offset);
     }
+    littleEndianInt16ToBytes(indexes.size(), bytes.data() + offset);
+    offset += 2;
+    for(auto & index : indexes){
+        littleEndianInt16ToBytes(index.size(), bytes.data() + offset);
+        offset += 2;
+        for(const auto & j : index){
+            offset += StringRecord(j.c_str(), j.length()).convertToBytes(bytes.data()+offset);
+        }
+    }
     return bytes;
 }
 
@@ -173,6 +200,10 @@ void TableDef::pushColumn(std::string col, RecordType type) {
     types.push_back(type);
 }
 
+void TableDef::addIndex(std::vector<std::string> &index) {
+    indexes.push_back(index);
+}
+
 bool TableDef::operator==(const TableDef &rhs) const {
     return (&rhs == this) || (prefix == rhs.prefix &&
            pKey == rhs.pKey &&
@@ -182,7 +213,18 @@ bool TableDef::operator==(const TableDef &rhs) const {
 }
 
 bool TableDef::checkSanity() {
+    for(auto &it1: indexes){
+        for(auto &it2: it1){
+            if(std::find(columnNames.begin(), columnNames.end(), it2) == columnNames.end()){
+                return false;
+            }
+        }
+    }
     return columnNames.size() >= pKey;
+}
+
+int TableDef::getIndexSize() const{
+    return (int)indexes.size();
 }
 
 Row:: Row(std::vector<uint8_t> &key, std::vector<uint8_t> &val, TableDef &tableDef){
@@ -293,6 +335,8 @@ std::vector<uint8_t> Row::getValue(TableDef &tableDef) {
     }
     return bytes;
 }
+
+
 
 Row::~Row() {
     for(auto & val : value){

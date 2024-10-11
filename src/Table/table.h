@@ -55,6 +55,7 @@ class Row;
 class TableDef {
     std::vector<RecordType> types;
     std::vector<std::string> columnNames;
+    std::vector<std::vector<std::string>> indexes;
     public:
     std::string  name;
     int prefix;
@@ -65,9 +66,11 @@ class TableDef {
     uint32_t keyLength() const;
     uint32_t valueLength();
     void pushColumn(std::string col, RecordType type);
+    void addIndex(std::vector<std::string> &index);
     std::vector<uint8_t> getKey() const;
     std::vector<uint8_t> getValue();
     bool checkSanity();
+    int getIndexSize()const;
     friend class Row;
 };
 

@@ -56,7 +56,10 @@ static const char* TableDefTest(){
     def.pushColumn("col2", RECORD_STRING);
     def.pushColumn("col3", RECORD_INT);
     def.pushColumn("col4", RECORD_STRING);
-
+    auto idx1 = vector<string>{"col1", "col2"};
+    def.addIndex(idx1);
+    idx1[0] = "col3";
+    def.addIndex(idx1);
     std::vector<uint8_t >key=def.getKey(), val=def.getValue();
     TableDef def2(key.data(), val.data());
     mu_assert("TableDef::first", IntRecord(key.data()).toInt() == 1);

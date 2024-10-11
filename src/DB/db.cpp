@@ -34,18 +34,21 @@ bool DB::CreateTable(TableDef &tableDef) {
     if(!btree->Get(key).empty()){
         return false;
     }
-
+    //Code to get the prefix
     Row row;
-    row.pushRow(metaKey, new StringRecord(metaVal, 6));
+    row.pushRow(metaKey, new StringRecord(metaPrefix, strlen(metaPrefix)));
     auto prefixKey = row.getKey(Meta_Def);
     auto prefix = btree->Get(prefixKey);
     tableDef.prefix=3;
     if(!prefix.empty()) {
         tableDef.prefix = stoi(StringRecord(prefix.data()).toString(), nullptr, 10);
     }
+    //Insert definition
     auto val = tableDef.getValue();
     btree->Insert(key, val);
-    std::string updatedPrefix = std::to_string(tableDef.prefix+1);
+
+    //Update prefix in meta table
+    std::string updatedPrefix = std::to_string(tableDef.prefix+1+tableDef.getIndexSize());
     row.pushRow(metaVal, new StringRecord(updatedPrefix.c_str(), updatedPrefix.size()));
     auto updatedPrefixVal = row.getValue(Meta_Def);
     btree->Insert(prefixKey, updatedPrefixVal);
