@@ -23,17 +23,17 @@ class BTree {
             BNode* oldNode, BNode* newNode, uint16_t idx,
             std::vector<BNode*>kids);
     BNode* treeInsert(BNode* oldNode, std::vector<uint8_t >& key, std::vector<uint8_t>& value, UpdateResult& result);
-    BNode* treeDelete(BNode* oldNode,std::vector<uint8_t >& key);
+    BNode* treeDelete(BNode* oldNode,std::vector<uint8_t >& key, DeleteResult& result);
     std::vector<uint8_t > treeGet(BNode* node,std::vector<uint8_t >& key);
     void nodeInsert(BNode* ,BNode*,uint16_t , std::vector<uint8_t >&, std::vector<uint8_t>& , UpdateResult& result);
     std::pair<int,BNode*> shouldMerge(BNode*, uint16_t , BNode*);
-    BNode* nodeDelete(BNode*,uint16_t ,std::vector<uint8_t >&);
+    BNode* nodeDelete(BNode*,uint16_t ,std::vector<uint8_t >&, DeleteResult& result);
     protected:
     uint64_t root;
     public:
         virtual ~BTree();
         virtual void Insert(std::vector<uint8_t >& key, std::vector<uint8_t >& value, UpdateResult& result);
-        virtual bool Delete(std::vector<uint8_t >&);
+        virtual bool Delete(std::vector<uint8_t >&, DeleteResult&);
         virtual std::vector<uint8_t > Get(std::vector<uint8_t >&);
 };
 std::vector<BNode*> nodeSplit3(BNode* );

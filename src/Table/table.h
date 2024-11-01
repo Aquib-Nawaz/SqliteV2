@@ -91,6 +91,7 @@ public:
     std::vector<uint8_t> getValue(TableDef &tableDef);
     Record* getRecord(const std::string &col);
     std::vector<std::vector<uint8_t>> getIndexTableKeys(TableDef &tableDef);
+    void clearValues();
     ~Row();
 };
 

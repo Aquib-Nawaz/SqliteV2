@@ -119,7 +119,8 @@ static const char * leafDeleteTest(){
         bnode.nodeAppendKV(i, data, v);
     }
     BNode newNode(1);
-    newNode.leafDelete(&bnode, 5);
+    DeleteResult delResult;
+    newNode.leafDelete(&bnode, 5, delResult);
     mu_assert("Size Match", newNode.nKeys() == 8);
     for(int i=0;i<5;i++){
         data[0] = i;

@@ -360,8 +360,13 @@ std::vector<std::vector<uint8_t>> Row::getIndexTableKeys(TableDef &def){
         temp.pKey = index.size()+def.pKey;
         ++temp.prefix;
         ret.push_back(indexRow.getKey(temp));
+        indexRow.clearValues();
     }
     return ret;
+}
+
+void Row::clearValues() {
+    value.clear();
 }
 
 Row::~Row() {

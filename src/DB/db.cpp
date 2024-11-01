@@ -53,7 +53,7 @@ bool DB::CreateTable(TableDef &tableDef) {
     std::string updatedPrefix = std::to_string(tableDef.prefix+1+tableDef.getIndex().size());
     row.pushRow(metaVal, new StringRecord(updatedPrefix.c_str(), updatedPrefix.size()));
     auto updatedPrefixVal = row.getValue(Meta_Def);
-    res.type = UPDATE_UPDATE;
+    res.type = UPDATE_UPSERT;
     btree->Insert(prefixKey, updatedPrefixVal, res);
     return true;
 }
@@ -66,14 +66,18 @@ bool DB::Insert(std::string &tableName, Row &row, UpdateResult& res) {
     auto key = row.getKey(def),
         val = row.getValue(def);
     btree->Insert(key, val, res);
-
-    //Insert index
-//    UpdateResult temp;
-//    temp.type = UPDATE_INSERT;
-//    std::vector<uint8_t>empty;
-//    for(auto &indexKey: row.getIndexTableKeys(def)){
-//        btree->Insert(indexKey, empty, temp);
-//    }
+    DeleteResult temp;
+    if(res.updated){
+        Row oldRow(key, res.oldValue, def);
+        for(auto &indexKey: oldRow.getIndexTableKeys(def)){
+            btree->Delete(indexKey, temp);
+        }
+    }
+    if(res.updated || res.added){
+        for(auto &indexKey: row.getIndexTableKeys(def)){
+            btree->Insert(indexKey, key, res);
+        }
+    }
     return true;
 }
 
@@ -97,10 +101,12 @@ bool DB::Delete(std::string & tableName, Row & row) {
         return false;
     }
     auto key = row.getKey(def);
-    bool ret = btree->Delete(key);
+    DeleteResult res;
+    bool ret = btree->Delete(key, res);
     if(ret){
+        row.populateValue(def, res.oldVal);
         for(auto &indexKey: row.getIndexTableKeys(def)){
-            btree->Delete(indexKey);
+            btree->Delete(indexKey, res);
         }
     }
     return ret;

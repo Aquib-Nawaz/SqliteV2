@@ -52,12 +52,16 @@ static  const char* DBCreate2TableTest(){
     def.pushColumn("col1", RECORD_INT);
     def.pushColumn("col2", RECORD_STRING);
     def.pushColumn("col3", RECORD_INT);
+    std::vector<std::string> idx1 = {"col2", "col3"};
+    def.addIndex(idx1);
+    std::vector<std::string> idx2 = {"col3", "col2"};
+    def.addIndex(idx1);
     mu_assert("DB::CreateTable", db.CreateTable(def));
     mu_assert("DB:Table prefix 3", def.prefix == 3);
     mu_assert("DB::CreateTable same name", !db.CreateTable(def));
     def.name = "table2";
     mu_assert("DB::CreateTable different name", db.CreateTable(def));
-    mu_assert("DB:Table prefix 4", def.prefix == 4);
+    mu_assert("DB:Table prefix 6", def.prefix == 6);
     Row row({"col1", "col2", "col3"},{new IntRecord(1),
                                       new StringRecord("Hello", 5),
                                       new IntRecord(2)});

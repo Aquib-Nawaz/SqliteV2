@@ -21,9 +21,9 @@ std::vector<uint8_t> DiskPageDBMemory::Get(std::vector<uint8_t> &key) {
     return BTree::Get(key);
 }
 
-bool DiskPageDBMemory::Delete(std::vector<uint8_t> & key) {
+bool DiskPageDBMemory::Delete(std::vector<uint8_t> & key, DeleteResult &res) {
     root = mmapChunk->getRoot();
-    bool ret = BTree::Delete(key);
+    bool ret = BTree::Delete(key, res);
     mmapChunk->setRoot(root);
     return ret;
 }

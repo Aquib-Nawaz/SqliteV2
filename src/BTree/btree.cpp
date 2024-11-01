@@ -22,7 +22,7 @@ void BTree::nodeReplaceKidN( BNode* oldNode, BNode* newNode, uint16_t idx,
 
     newNode->nodeAppendRange(oldNode, idx+inc, idx+1, oldNode->nKeys()-(idx+1));
 }
-BNode* BTree::treeDelete(BNode *oldNode, std::vector<uint8_t> & key) {
+BNode* BTree::treeDelete(BNode *oldNode, std::vector<uint8_t> & key, DeleteResult& result) {
     auto * newNode = new BNode(1);
     uint16_t idx = oldNode->nodeLookUpLE(key);
     switch (oldNode->bType()) {
@@ -32,10 +32,10 @@ BNode* BTree::treeDelete(BNode *oldNode, std::vector<uint8_t> & key) {
                 delete newNode;
                 return nullptr;
             }
-            newNode->leafDelete(oldNode, idx);
+            newNode->leafDelete(oldNode, idx, result);
             break;
         case BTREE_INTERIOR:
-            nodeDelete(oldNode, idx, key);
+            nodeDelete(oldNode, idx, key, result);
             break;
         default:
             assert(false);
@@ -93,10 +93,10 @@ void BTree::nodeInsert(BNode* old,BNode* newNode,uint16_t idx,
     nodeReplaceKidN(old, newNode, idx, splits);
 }
 
-BNode* BTree::nodeDelete(BNode* par,uint16_t idx,std::vector<uint8_t >&key){
+BNode* BTree::nodeDelete(BNode* par,uint16_t idx,std::vector<uint8_t >&key, DeleteResult& result){
     uint64_t kptr = par->getPtr(idx);
     auto prevChild = get(kptr);
-    auto updated = treeDelete(prevChild, key);
+    auto updated = treeDelete(prevChild, key, result);
 //    delete prevChild;
     if(updated == nullptr){
         return nullptr;
@@ -179,11 +179,11 @@ void BTree::Insert(std::vector<uint8_t> &key, std::vector<uint8_t> & val, Update
     }
 }
 
-bool BTree::Delete(std::vector<uint8_t> & key) {
+bool BTree::Delete(std::vector<uint8_t> & key, DeleteResult& result) {
     if(root==0 || key.empty())
         return false;
     auto rootNode = get(root);
-    auto updatedRoot = treeDelete(rootNode, key);
+    auto updatedRoot = treeDelete(rootNode, key, result);
     delete rootNode;
     if(updatedRoot==nullptr)
         return false;

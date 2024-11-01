@@ -137,7 +137,8 @@ static const char * deleteLevel3_Test(){
     }
     for(int i=3;i<=7;i+=2) {
         key[0] = i;
-        tree->Delete(key);
+        DeleteResult delResult;
+        tree->Delete(key, delResult);
         mu_assert_iter(i, "Value Mismatch", tree->Get(key).empty());
     }
     for(int i=1;i<=10;i++){

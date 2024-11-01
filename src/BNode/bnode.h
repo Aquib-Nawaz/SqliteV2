@@ -47,6 +47,10 @@ struct UpdateResult {
     UpdateType type;
 };
 
+struct DeleteResult {
+    std::vector<uint8_t >oldVal;
+};
+
 /**
  * \class BNode
  * \brief Class representing a node in a B-Tree.
@@ -211,8 +215,9 @@ public:
      * \brief Deletes a key-value pair from the leaf node and insert the remaining data in current node.
      * \param srcNode Original node to delete from.
      * \param idx Index of original node to delete the key-value pair from.
+     * \param result Result contains old value.
      */
-    void leafDelete(BNode* srcNode, uint16_t idx);
+    void leafDelete(BNode* srcNode, uint16_t idx, DeleteResult& result);
 
     /**
      * \brief Updates or inserts a key-value pair into the node.
