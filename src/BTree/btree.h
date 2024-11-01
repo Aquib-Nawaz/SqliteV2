@@ -9,16 +9,15 @@
 #include <cstdint>
 #include "bnode.h"
 #include <utility>
-
+#include "btreeio.h"
 #define BTREE_MAX_KEY_SIZE 4000
 #define BTREE_MAX_VAL_SIZE 12000
 
 class BTreeIterator;
 class BTree {
     friend class BTreeIterator;
-    virtual BNode * get(uint64_t pageNum)=0;
-    virtual void del(uint64_t pageNum)=0;
-    virtual uint64_t insert(BNode* node)=0;
+
+    BTreeIO* inputOutput;
     void nodeReplaceKidN(
             BNode* oldNode, BNode* newNode, uint16_t idx,
             std::vector<BNode*>kids);
@@ -29,8 +28,9 @@ class BTree {
     std::pair<int,BNode*> shouldMerge(BNode*, uint16_t , BNode*);
     BNode* nodeDelete(BNode*,uint16_t ,std::vector<uint8_t >&, DeleteResult& result);
     protected:
-    uint64_t root;
+    uint64_t root{};
     public:
+        BTree(BTreeIO* _inputOutput);
         virtual ~BTree();
         virtual void Insert(std::vector<uint8_t >& key, std::vector<uint8_t >& value, UpdateResult& result);
         virtual bool Delete(std::vector<uint8_t >&, DeleteResult&);

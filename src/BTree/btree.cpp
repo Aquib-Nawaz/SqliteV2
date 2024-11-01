@@ -5,7 +5,15 @@
 #include "btree.h"
 #include <cassert>
 
-BTree::~BTree()= default;
+BTree::~BTree() {
+    delete inputOutput;
+}
+
+BTree::BTree(BTreeIO *_inputOutput) {
+    inputOutput = _inputOutput;
+    root = 0;
+}
+
 void BTree::nodeReplaceKidN( BNode* oldNode, BNode* newNode, uint16_t idx,
         std::vector<BNode*> kids){
 
@@ -17,7 +25,7 @@ void BTree::nodeReplaceKidN( BNode* oldNode, BNode* newNode, uint16_t idx,
     std::vector<uint8_t> key ,v;
     for(uint16_t i=0;i<(uint16_t)kids.size();i++){
         key = kids[i]->getKey(0);
-        newNode->nodeAppendKV(idx+i,key, v, insert(kids[i]));
+        newNode->nodeAppendKV(idx+i,key, v, inputOutput->insert(kids[i]));
     }
 
     newNode->nodeAppendRange(oldNode, idx+inc, idx+1, oldNode->nKeys()-(idx+1));
@@ -69,7 +77,7 @@ std::vector<uint8_t >BTree::treeGet(BNode* node, std::vector<uint8_t >&key){
     std::vector<uint8_t> ret;
     if(node->bType()== BTREE_INTERIOR) {
         uint64_t ptr = node->getPtr(idx);
-        ret = treeGet(get(ptr), key);
+        ret = treeGet(inputOutput->get(ptr), key);
     }
     else if(node->bType() == BTREE_LEAF)
         ret = idx!=node->nKeys() && node->getKey(idx) == key ? node->getVal(idx) : std::vector<uint8_t>();
@@ -82,26 +90,26 @@ std::vector<uint8_t >BTree::treeGet(BNode* node, std::vector<uint8_t >&key){
 void BTree::nodeInsert(BNode* old,BNode* newNode,uint16_t idx,
                          std::vector<uint8_t >& key, std::vector<uint8_t>& value, UpdateResult& result){
     uint64_t kptr = old->getPtr(idx);
-    auto prevChild = get(kptr);
+    auto prevChild = inputOutput->get(kptr);
     auto knode = treeInsert( prevChild, key, value, result);
     delete prevChild;
     if(knode== nullptr){
         return;
     }
     auto splits = nodeSplit3(knode);
-    del(kptr);
+    inputOutput->del(kptr);
     nodeReplaceKidN(old, newNode, idx, splits);
 }
 
 BNode* BTree::nodeDelete(BNode* par,uint16_t idx,std::vector<uint8_t >&key, DeleteResult& result){
     uint64_t kptr = par->getPtr(idx);
-    auto prevChild = get(kptr);
+    auto prevChild = inputOutput->get(kptr);
     auto updated = treeDelete(prevChild, key, result);
 //    delete prevChild;
     if(updated == nullptr){
         return nullptr;
     }
-    del(kptr);
+    inputOutput->del(kptr);
     auto newNode = new BNode(1);
     auto [mergeDir, sibling] = shouldMerge(par, idx, updated);
     switch (mergeDir) {
@@ -109,18 +117,18 @@ BNode* BTree::nodeDelete(BNode* par,uint16_t idx,std::vector<uint8_t >&key, Dele
         {
             auto merged = new BNode(1);
             nodeMerge(merged, sibling, updated);
-            del(par->getPtr(idx-1));
+            inputOutput->del(par->getPtr(idx-1));
             auto fkey = merged->getKey(0);
-            nodeReplace2Kid(newNode, par, idx-1, insert(merged), fkey);
+            nodeReplace2Kid(newNode, par, idx-1, inputOutput->insert(merged), fkey);
             break;
         }
         case 1:
         {
             auto merged = new BNode(1);
             nodeMerge(merged, updated, sibling);
-            del(par->getPtr(idx+1));
+            inputOutput->del(par->getPtr(idx+1));
             auto fkey = merged->getKey(0);
-            nodeReplace2Kid(newNode, par, idx, insert(merged), fkey);
+            nodeReplace2Kid(newNode, par, idx, inputOutput->insert(merged), fkey);
             break;
         }
         case 0:
@@ -152,17 +160,17 @@ void BTree::Insert(std::vector<uint8_t> &key, std::vector<uint8_t> & val, Update
         std::vector<uint8_t>k;
         rootNode->nodeAppendKV(0,k,k);
         rootNode->nodeAppendKV(1, key, val);
-        root = insert(rootNode);
+        root = inputOutput->insert(rootNode);
         return;
     }
 
-    auto rootNode = get(root);
+    auto rootNode = inputOutput->get(root);
     auto node = treeInsert(rootNode, key, val, result);
     delete rootNode;
     if(node == nullptr)
         return;
     std::vector<BNode*> splits = nodeSplit3(node);
-    del(root);
+    inputOutput->del(root);
 
     if(splits.size()>1){
         rootNode = new BNode(1);
@@ -170,32 +178,32 @@ void BTree::Insert(std::vector<uint8_t> &key, std::vector<uint8_t> & val, Update
         std::vector<uint8_t> k,v;
         for(uint16_t i=0;i<(uint16_t)splits.size();i++){
             k = splits[i]->getKey(0);
-            rootNode->nodeAppendKV(i, k, v, insert(splits[i]));
+            rootNode->nodeAppendKV(i, k, v, inputOutput->insert(splits[i]));
         }
-        root = insert(rootNode);
+        root = inputOutput->insert(rootNode);
     }
     else {
-        root = insert(splits[0]);
+        root = inputOutput->insert(splits[0]);
     }
 }
 
 bool BTree::Delete(std::vector<uint8_t> & key, DeleteResult& result) {
     if(root==0 || key.empty())
         return false;
-    auto rootNode = get(root);
+    auto rootNode = inputOutput->get(root);
     auto updatedRoot = treeDelete(rootNode, key, result);
     delete rootNode;
     if(updatedRoot==nullptr)
         return false;
-    del(root);
-    root = insert(updatedRoot);
+    inputOutput->del(root);
+    root = inputOutput->insert(updatedRoot);
     return true;
 }
 
 std::vector<uint8_t> BTree:: Get(std::vector<uint8_t> & key) {
     if(root==0)
         return {};
-    auto rootNode = get(root);
+    auto rootNode = inputOutput->get(root);
     return treeGet(rootNode, key);
 }
 
@@ -251,7 +259,7 @@ std::pair<int, BNode*> BTree::shouldMerge(BNode* par, uint16_t idx, BNode* updat
     }
     if(idx>0){
         //Check left
-        auto left = get(par->getPtr(idx-1));
+        auto left = inputOutput->get(par->getPtr(idx-1));
         uint16_t merged_size = left->nBytes() + updated->nBytes()-HEADER_SIZE;
         if(merged_size<=BTREE_PAGE_SIZE){
             return {-1,left};
@@ -259,7 +267,7 @@ std::pair<int, BNode*> BTree::shouldMerge(BNode* par, uint16_t idx, BNode* updat
     }
     if(idx<par->nKeys()-1){
         //Check right
-        auto right = get(par->getPtr(idx+1));
+        auto right = inputOutput->get(par->getPtr(idx+1));
         uint16_t merged_size = updated->nBytes() + right->nBytes()-HEADER_SIZE;
         if(merged_size<=BTREE_PAGE_SIZE){
             return {1,right};

@@ -7,17 +7,16 @@
 
 #include "btree.h"
 #include <unordered_map>
+#include "keyvalue.h"
 
-class HashMapDBMemory: public BTree {
-    uint64_t count;
-    std::unordered_map<uint64_t, uint8_t*> memory;
+class HashMapDBMemory: public  KeyValue{
+    BTree* btree;
 public:
     HashMapDBMemory();
-    ~HashMapDBMemory();
-
-    BNode * get(uint64_t) override;
-    void del(uint64_t) override;
-    uint64_t insert(BNode*) override;
+    ~HashMapDBMemory() override;
+    void Insert(std::vector<uint8_t> &, std::vector<uint8_t> &, UpdateResult&) override;
+    std::vector<uint8_t> Get(std::vector<uint8_t> &) override;
+    bool Delete(std::vector<uint8_t >&, DeleteResult&) override;
 };
 
 #endif //SQLITEV2_HASHMAP_H
