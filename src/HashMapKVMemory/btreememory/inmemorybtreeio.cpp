@@ -23,7 +23,7 @@ uint64_t InMemoryBTreeIO::insert(BNode  *val) {
     return count;
 }
 
-void InMemoryBTreeIO::commit() {}
+void InMemoryBTreeIO::commit(uint64_t ) {}
 
 InMemoryBTreeIO::InMemoryBTreeIO(BNodeFactory *factory) {
     count = 0;

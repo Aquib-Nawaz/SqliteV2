@@ -11,7 +11,7 @@ void DiskKV::Insert(std::vector<uint8_t> & key, std::vector<uint8_t> & val,
     auto meta = mmapChunk->getMetaData();
     btree->Insert(key, val, res);
     //updated the memory root
-    mmapChunk->setRoot(btree->getRoot());
+//    mmapChunk->setRoot(btree->getRoot());
     mmapChunk->updateOrRevert(meta);
     delete []meta;
 }
@@ -25,7 +25,7 @@ bool DiskKV::Delete(std::vector<uint8_t> & key, DeleteResult &res) {
     btree->setRoot(mmapChunk->getRoot());
     auto meta = mmapChunk->getMetaData();
     bool ret = btree->Delete(key, res);
-    mmapChunk->setRoot(btree->getRoot());
+//    mmapChunk->setRoot(btree->getRoot());
     mmapChunk->updateOrRevert(meta);
     delete []meta;
     return ret;

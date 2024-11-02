@@ -19,7 +19,7 @@ class DiskBTreeIO: public BTreeIO {
     BNode * get(uint64_t key) override;
     void del(uint64_t key) override;
     uint64_t insert(BNode *val) override;
-    void commit() override;
+    void commit(uint64_t ) override;
     ~DiskBTreeIO() override;
 };
 

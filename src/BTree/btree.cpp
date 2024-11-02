@@ -169,7 +169,7 @@ void BTree::Insert(std::vector<uint8_t> &key, std::vector<uint8_t> & val, Update
         rootNode->nodeAppendKV(0,k,k);
         rootNode->nodeAppendKV(1, key, val);
         root = inputOutput->insert(rootNode);
-        inputOutput->commit();
+        inputOutput->commit(root);
         return;
     }
 
@@ -194,7 +194,7 @@ void BTree::Insert(std::vector<uint8_t> &key, std::vector<uint8_t> & val, Update
     else {
         root = inputOutput->insert(splits[0]);
     }
-    inputOutput->commit();
+    inputOutput->commit(root);
 }
 
 bool BTree::Delete(std::vector<uint8_t> & key, DeleteResult& result) {
@@ -207,7 +207,7 @@ bool BTree::Delete(std::vector<uint8_t> & key, DeleteResult& result) {
         return false;
     inputOutput->del(root);
     root = inputOutput->insert(updatedRoot);
-    inputOutput->commit();
+    inputOutput->commit(root);
     return true;
 }
 
