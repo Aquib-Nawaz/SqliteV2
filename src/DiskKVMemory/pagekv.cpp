@@ -2,7 +2,7 @@
 // Created by Aquib Nawaz on 27/09/24.
 //
 
-#include "pagedb.h"
+#include "pagekv.h"
 #include "diskbtreememory/diskbtreeio.h"
 void DiskKV::Insert(std::vector<uint8_t> & key, std::vector<uint8_t> & val,
                     UpdateResult& res) {
@@ -23,8 +23,11 @@ std::vector<uint8_t> DiskKV::Get(std::vector<uint8_t> &key) {
 
 bool DiskKV::Delete(std::vector<uint8_t> & key, DeleteResult &res) {
     btree->setRoot(mmapChunk->getRoot());
+    auto meta = mmapChunk->getMetaData();
     bool ret = btree->Delete(key, res);
     mmapChunk->setRoot(btree->getRoot());
+    mmapChunk->updateOrRevert(meta);
+    delete []meta;
     return ret;
 }
 

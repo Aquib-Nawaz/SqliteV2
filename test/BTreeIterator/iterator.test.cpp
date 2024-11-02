@@ -1,20 +1,20 @@
 
-
 #include "../minunit.h"
 #include <iostream>
 #include "iterator.h"
-#include "pagedb.h"
+#include "pagekv.h"
 #include <filesystem>
 #include "convertor.h"
+#include "diskbtreememory/diskbtreeio.h"
 
 int tests_run = 0;
-
+BNodeFactory * factory;
 
 static const char * BTreeIterator_initialization() {
     const char *filename = "test.db";
     std::filesystem::remove(filename);
     MMapChunk chunk(filename);
-    BTree *btree = new DiskPageDBMemory(&chunk);
+    BTree *btree = new BTree( new DiskBTreeIO(&chunk, factory));
     BTreeIterator it(btree);
     mu_assert("Iterator should be invalid initially", !it.valid());
     std::vector<uint8_t> key(1);
@@ -37,7 +37,7 @@ static const char * BTreeLessThan(){
     const char *filename = "test.db";
     std::filesystem::remove(filename);
     MMapChunk chunk(filename);
-    BTree *btree = new DiskPageDBMemory(&chunk);
+    BTree *btree = new BTree( new DiskBTreeIO(&chunk, factory));
     BTreeIterator it(btree);
     std::vector<uint8_t> key(1);
     UpdateResult res;
@@ -60,7 +60,7 @@ static const char* BTreeIterator_next(){
     const char *filename = "test.db";
     std::filesystem::remove(filename);
     MMapChunk chunk(filename);
-    BTree *btree = new DiskPageDBMemory(&chunk);
+    BTree *btree = new BTree( new DiskBTreeIO(&chunk, factory));
     BTreeIterator it(btree);
     std::vector<uint8_t> key(1);
     UpdateResult res;
@@ -86,7 +86,7 @@ static const char* BTreeIterator_prev(){
     const char *filename = "test.db";
     std::filesystem::remove(filename);
     MMapChunk chunk(filename);
-    BTree *btree = new DiskPageDBMemory(&chunk);
+    BTree *btree = new BTree( new DiskBTreeIO(&chunk, factory));
     BTreeIterator it(btree);
     std::vector<uint8_t> key(1);
     UpdateResult res;
@@ -113,7 +113,7 @@ static const char * BTreeMultiLevelTreeTest(){
     const char *filename = "test.db";
     std::filesystem::remove(filename);
     MMapChunk chunk(filename);
-    BTree *btree = new DiskPageDBMemory(&chunk);
+    BTree *btree = new BTree( new DiskBTreeIO(&chunk, factory));
     BTreeIterator it(btree);
     std::vector<uint8_t> key(4);
     int numKeys = 10000;
@@ -147,7 +147,7 @@ static const char * all_tests(){
 }
 
 int main(){
-
+    factory = new BNodeFactory();
     printf("Executing test file: %s\n", __FILE_NAME__);
     const char * result = all_tests();
     if(result != nullptr){
@@ -156,5 +156,6 @@ int main(){
         printf("ALL TESTS PASSED\n");
     }
     printf("Tests run: %d\n", tests_run);
+    delete factory;
     return result != nullptr;
 }

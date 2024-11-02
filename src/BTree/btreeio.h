@@ -11,6 +11,7 @@ public:
     virtual BNode* get(uint64_t pageNum)=0;
     virtual void del(uint64_t pageNum)=0;
     virtual uint64_t insert(BNode* node)=0;
+    virtual void commit()=0;
 };
 
 #endif //SQLITEV2_BTREEIO_H

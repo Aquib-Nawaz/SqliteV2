@@ -2,8 +2,8 @@
 // Created by Aquib Nawaz on 27/09/24.
 //
 
-#ifndef SQLITEV2_PAGEDB_H
-#define SQLITEV2_PAGEDB_H
+#ifndef SQLITEV2_PAGEKV_H
+#define SQLITEV2_PAGEKV_H
 
 #include "btree.h"
 #include <vector>
@@ -25,4 +25,4 @@ public:
 };
 
 
-#endif //SQLITEV2_PAGEDB_H
+#endif //SQLITEV2_PAGEKV_H

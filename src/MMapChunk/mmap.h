@@ -51,7 +51,6 @@ class MMapChunk{
     std::pair<size_t ,uint64_t> getPtrLocation(uint64_t);
     void clearPendingUpdates();
     int writePages();
-    int updateFile();
     int updateRoot();
     void loadMeta(uint8_t*);
 public:
@@ -66,6 +65,7 @@ public:
     uint64_t getRoot() const;
     void setRoot(uint64_t);
     int updateOrRevert(uint8_t *);
+    int updateFile();
     friend class MMapTest;
 };
 

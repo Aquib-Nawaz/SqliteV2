@@ -225,7 +225,7 @@ uint8_t* MMapChunk:: getMetaData(){
 }
 
 int MMapChunk::updateOrRevert(uint8_t * curMetaData) {
-    int err = updateFile();
+    int err = 0;
 //    clearPendingUpdates();
 //    pagesToSet.clear();
     if(err){

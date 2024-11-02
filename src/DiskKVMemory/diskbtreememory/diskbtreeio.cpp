@@ -23,4 +23,8 @@ void DiskBTreeIO::del(uint64_t ptr) {
     mmap->del(ptr);
 }
 
+void DiskBTreeIO::commit() {
+    mmap->updateFile();
+}
+
 DiskBTreeIO::~DiskBTreeIO() = default;

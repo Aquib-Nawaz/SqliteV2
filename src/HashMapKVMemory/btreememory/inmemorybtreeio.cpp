@@ -23,6 +23,8 @@ uint64_t InMemoryBTreeIO::insert(BNode  *val) {
     return count;
 }
 
+void InMemoryBTreeIO::commit() {}
+
 InMemoryBTreeIO::InMemoryBTreeIO(BNodeFactory *factory) {
     count = 0;
     nodeFactory = factory;

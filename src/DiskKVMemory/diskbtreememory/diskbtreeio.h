@@ -15,9 +15,11 @@ class DiskBTreeIO: public BTreeIO {
 
     public:
     DiskBTreeIO(MMapChunk *mmap, BNodeFactory *factory);
+
     BNode * get(uint64_t key) override;
     void del(uint64_t key) override;
     uint64_t insert(BNode *val) override;
+    void commit() override;
     ~DiskBTreeIO() override;
 };
 
