@@ -14,6 +14,14 @@ BTree::BTree(BTreeIO *_inputOutput) {
     root = 0;
 }
 
+uint64_t BTree::getRoot() const{
+    return root;
+}
+
+void BTree::setRoot(uint64_t _root) {
+    root = _root;
+}
+
 void BTree::nodeReplaceKidN( BNode* oldNode, BNode* newNode, uint16_t idx,
         std::vector<BNode*> kids){
 
@@ -96,7 +104,7 @@ void BTree::nodeInsert(BNode* old,BNode* newNode,uint16_t idx,
     if(knode== nullptr){
         return;
     }
-    auto splits = nodeSplit3(knode);
+    auto splits = BNode::nodeSplit3(knode);
     inputOutput->del(kptr);
     nodeReplaceKidN(old, newNode, idx, splits);
 }
@@ -116,19 +124,19 @@ BNode* BTree::nodeDelete(BNode* par,uint16_t idx,std::vector<uint8_t >&key, Dele
         case -1:
         {
             auto merged = new BNode(1);
-            nodeMerge(merged, sibling, updated);
+            BNode::nodeMerge(merged, sibling, updated);
             inputOutput->del(par->getPtr(idx-1));
             auto fkey = merged->getKey(0);
-            nodeReplace2Kid(newNode, par, idx-1, inputOutput->insert(merged), fkey);
+            BNode::nodeReplace2Kid(newNode, par, idx-1, inputOutput->insert(merged), fkey);
             break;
         }
         case 1:
         {
             auto merged = new BNode(1);
-            nodeMerge(merged, updated, sibling);
+            BNode::nodeMerge(merged, updated, sibling);
             inputOutput->del(par->getPtr(idx+1));
             auto fkey = merged->getKey(0);
-            nodeReplace2Kid(newNode, par, idx, inputOutput->insert(merged), fkey);
+            BNode::nodeReplace2Kid(newNode, par, idx, inputOutput->insert(merged), fkey);
             break;
         }
         case 0:
@@ -146,8 +154,8 @@ BNode* BTree::nodeDelete(BNode* par,uint16_t idx,std::vector<uint8_t >&key, Dele
 }
 
 void BTree::Insert(std::vector<uint8_t> &key, std::vector<uint8_t> & val, UpdateResult& result) {
-    checkLimit(key, val);
 
+    BNode::checkLimit(key, val);
     if (root == 0){
         result.updated = false;
         if(result.type==UPDATE_UPDATE){
@@ -169,7 +177,7 @@ void BTree::Insert(std::vector<uint8_t> &key, std::vector<uint8_t> & val, Update
     delete rootNode;
     if(node == nullptr)
         return;
-    std::vector<BNode*> splits = nodeSplit3(node);
+    std::vector<BNode*> splits = BNode::nodeSplit3(node);
     inputOutput->del(root);
 
     if(splits.size()>1){
@@ -207,51 +215,6 @@ std::vector<uint8_t> BTree:: Get(std::vector<uint8_t> & key) {
     return treeGet(rootNode, key);
 }
 
-void nodeSplit2(BNode* left, BNode* right, BNode* old){
-    uint16_t offSize = OFFSET_ARRAY_ELEMENT_SIZE + ( old->bType()==BTREE_INTERIOR?
-            POINTER_ARRAY_ELEMENT_SIZE:0);
-    int i;
-    uint16_t lenReq = HEADER_SIZE;
-
-    for(i=old->nKeys(); lenReq<BTREE_PAGE_SIZE/2; i--){
-        lenReq += offSize + old->getOffset(i)-old->getOffset(i-1);
-    }
-    i++;
-    if(i==old->nKeys())i--;
-    right->_setHeader(old->bType(), old->nKeys()-i);
-    right->nodeAppendRange(old, 0,i, old->nKeys()-i);
-
-    left->_setHeader(old->bType(), i);
-    left->nodeAppendRange(old, 0, 0, i);
-    delete old;
-}
-
-std::vector<BNode*> nodeSplit3(BNode* old){
-    if(old->nBytes()<=BTREE_PAGE_SIZE){
-        old->shrink(1);
-        return { old};
-    }
-    auto * left = new BNode(2);
-    auto* right = new BNode(1);
-    nodeSplit2(left, right, old);
-
-    if(left->nBytes()<=BTREE_PAGE_SIZE) {
-        left->shrink(1);
-        return {left, right};
-    }
-    auto* leftleft = new BNode(1);
-
-    auto* middle = new BNode(1);
-
-    nodeSplit2(leftleft, middle, left);
-
-    assert(leftleft->nBytes()<=BTREE_PAGE_SIZE);
-    return {leftleft, middle, right};
-}
-
-void checkLimit(std::vector<uint8_t >&key, std::vector<uint8_t >&val){
-    assert(key.size()<=BTREE_MAX_KEY_SIZE && val.size()<=BTREE_MAX_VAL_SIZE && !key.empty());
-}
 
 std::pair<int, BNode*> BTree::shouldMerge(BNode* par, uint16_t idx, BNode* updated){
     if(updated->nBytes()>BTREE_PAGE_SIZE/4){
@@ -276,21 +239,5 @@ std::pair<int, BNode*> BTree::shouldMerge(BNode* par, uint16_t idx, BNode* updat
     return {0, nullptr};
 }
 
-void nodeMerge(BNode* merged, BNode* left, BNode* right){
-    assert(left->bType()==right->bType());
-    merged->_setHeader(left->bType(), left->nKeys()+right->nKeys());
-    merged->nodeAppendRange(left, 0, 0, left->nKeys());
-    merged->nodeAppendRange(right, left->nKeys(), 0, right->nKeys());
-    delete left;
-    delete right;
-}
 
-void nodeReplace2Kid(BNode* newNode, BNode* oldNode, uint16_t idx, uint64_t ptr,
-                std::vector<uint8_t > &key){
-    //delete idx and idx+1
-    newNode->_setHeader(BTREE_INTERIOR, oldNode->nKeys()-1);
-    newNode->nodeAppendRange(oldNode,0,0,idx);
-    std::vector<uint8_t >val;
-    newNode->nodeAppendKV(idx, key, val, ptr);
-    newNode->nodeAppendRange(oldNode, idx+1, idx+2, oldNode->nKeys()-idx-2);
-}
+

@@ -4,17 +4,20 @@
 
 #include <iostream>
 #include "db.h"
-#include "mmap.h"
 #include "../minunit.h"
-#include <filesystem>
+#include "hashmapkv.h"
+
 using namespace std;
 
 int tests_run = 0;
+BNodeFactory * factory;
+KeyValue* createKV(){
+    return new HashMapKV(factory);
+}
+
 static  const char* DBCreateTableTest(){
-    const char* filePath = "test.db";
-    std::remove(filePath);
-    MMapChunk mmap(filePath);
-    DB db(&mmap);
+
+    DB db(createKV());
     TableDef def;
     def.name = "table";
     def.pKey=1;
@@ -36,15 +39,12 @@ static  const char* DBCreateTableTest(){
     for(int i=0; i<row.cols.size(); i++){
         mu_assert_iter(i,"DB::Cols Value Match", row.value[i]->toString() == row2.value[i]->toString());
     }
-    std::remove(filePath);
     return nullptr;
 }
 
 static  const char* DBCreate2TableTest(){
-    const char* filePath = "test.db";
-    std::remove(filePath);
-    MMapChunk mmap(filePath);
-    DB db(&mmap);
+
+    DB db(createKV());
     TableDef def;
     string table1 = "table";
     def.name = "table";
@@ -73,7 +73,6 @@ static  const char* DBCreate2TableTest(){
     mu_assert("DB::Get no match for table2", !db.Get(def.name, row2));
     mu_assert("DB::Get no match for table2", db.Get(table1, row2));
 
-    std::remove(filePath);
     return nullptr;
 }
 
@@ -87,7 +86,7 @@ static const char* all_tests(){
 
 
 int main(){
-
+    factory = new BNodeFactory();
     const char * result = all_tests();
     printf("Executing test file: %s\n", __FILE_NAME__);
     if(result != nullptr){
@@ -96,5 +95,6 @@ int main(){
         printf("ALL TESTS PASSED\n");
     }
     printf("Tests run: %d\n", tests_run);
+    delete factory;
     return result != nullptr;
 }

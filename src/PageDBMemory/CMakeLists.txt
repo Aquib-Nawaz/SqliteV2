@@ -1,5 +1,6 @@
 
-add_library(PageDBMemory STATIC pagedb.cpp)
+add_library(PageDBMemory STATIC pagedb.cpp
+        diskbtreememory/diskbtreeio.cpp)
 
 target_include_directories(PageDBMemory
         INTERFACE .
@@ -11,4 +12,4 @@ target_link_libraries(PageDBMemory PRIVATE
 )
 
 target_link_libraries(PageDBMemory PUBLIC
-        BTree MMap)
+        BTree MMap DB)

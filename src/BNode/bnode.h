@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <vector>
 #include <unistd.h>
+#include "dbapi.h"
 
 #define HEADER_SIZE 4
 #define BTREE_PAGE_SIZE 16384
@@ -15,7 +16,8 @@
 #define VLEN_NUM_BYTES 2
 #define POINTER_ARRAY_ELEMENT_SIZE 8
 #define OFFSET_ARRAY_ELEMENT_SIZE 2
-
+#define BNODE_MAX_KEY_SIZE 4000
+#define BNODE_MAX_VAL_SIZE 12000
 /**
  * \enum BTreeNodeType
  * \brief Enum to represent the type of B-Tree node.
@@ -23,32 +25,6 @@
 enum BTreeNodeType {
     BTREE_LEAF = 0,      ///< Leaf node
     BTREE_INTERIOR = 1   ///< Interior node
-};
-
-/**
- * \enum UpdateType
- * \brief Enum to represent the type of update operation.
- */
-
-enum UpdateType {
-    UPDATE_INSERT = 0,
-    UPDATE_UPDATE = 1,
-    UPDATE_UPSERT = 2
-};
-
-/**
- * \struct UpdateResult
- * \brief Struct to represent the result of an update operation.
- */
-struct UpdateResult {
-    std::vector<uint8_t> oldValue;
-    bool added;
-    bool updated;
-    UpdateType type;
-};
-
-struct DeleteResult {
-    std::vector<uint8_t >oldVal;
 };
 
 /**
@@ -234,6 +210,12 @@ public:
      * \brief Destructor for BNode.
      */
     ~BNode();
+
+    static std::vector<BNode*> nodeSplit3(BNode* );
+    static void nodeSplit2(BNode* , BNode* , BNode* );
+    static void checkLimit(std::vector<uint8_t >&,std::vector<uint8_t >&);
+    static void nodeMerge(BNode*,BNode*,BNode*);
+    static void nodeReplace2Kid(BNode*,BNode*,uint16_t, uint64_t , std::vector<uint8_t>&);
 };
 
 #endif //SQLITEV2_BNODE_H

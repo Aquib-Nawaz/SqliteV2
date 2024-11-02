@@ -25,7 +25,7 @@ void BTreeIterator::iterNext(bool dir) {
             iterNext(dir); //See if parents have sibling
             if(!_stack.empty()){
                 uint16_t idx = dir?0:_stack.top().first->nKeys()-1;
-                _stack.emplace(_btree->get(_stack.top().first->getPtr(_stack.top().second)), idx);
+                _stack.emplace(_btree->inputOutput->get(_stack.top().first->getPtr(_stack.top().second)), idx);
             }
         }
     }
@@ -58,11 +58,11 @@ std::vector<uint8_t> BTreeIterator::value() {
 }
 
 void BTreeIterator::seekLE(std::vector<uint8_t> &key) {
-    BNode* node = _btree->get(_btree->root);
+    BNode* node = _btree->inputOutput->get(_btree->root);
     while(node->bType() == BTREE_INTERIOR){
         uint16_t idx = node->nodeLookUpLE(key);
         _stack.emplace(node, idx);
-        node = _btree->get(node->getPtr(idx));
+        node = _btree->inputOutput->get(node->getPtr(idx));
     }
     _stack.emplace(node, node->nodeLookUpLE(key));
 }

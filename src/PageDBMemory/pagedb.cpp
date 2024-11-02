@@ -3,48 +3,34 @@
 //
 
 #include "pagedb.h"
-
-void DiskPageDBMemory::Insert(std::vector<uint8_t> & key, std::vector<uint8_t> & val,
-                              UpdateResult& res) {
-    root = mmapChunk->getRoot();
+#include "diskbtreememory/diskbtreeio.h"
+void DiskKV::Insert(std::vector<uint8_t> & key, std::vector<uint8_t> & val,
+                    UpdateResult& res) {
+    btree->setRoot( mmapChunk->getRoot());
     //tree root and memory root are in sync now
     auto meta = mmapChunk->getMetaData();
-    BTree::Insert(key, val, res);
+    btree->Insert(key, val, res);
     //updated the memory root
-    mmapChunk->setRoot(root);
+    mmapChunk->setRoot(btree->getRoot());
     mmapChunk->updateOrRevert(meta);
     delete []meta;
 }
 
-std::vector<uint8_t> DiskPageDBMemory::Get(std::vector<uint8_t> &key) {
-    root = mmapChunk->getRoot();
-    return BTree::Get(key);
+std::vector<uint8_t> DiskKV::Get(std::vector<uint8_t> &key) {
+    btree->setRoot(mmapChunk->getRoot());
+    return btree->Get(key);
 }
 
-bool DiskPageDBMemory::Delete(std::vector<uint8_t> & key, DeleteResult &res) {
-    root = mmapChunk->getRoot();
-    bool ret = BTree::Delete(key, res);
-    mmapChunk->setRoot(root);
+bool DiskKV::Delete(std::vector<uint8_t> & key, DeleteResult &res) {
+    btree->setRoot(mmapChunk->getRoot());
+    bool ret = btree->Delete(key, res);
+    mmapChunk->setRoot(btree->getRoot());
     return ret;
 }
 
-DiskPageDBMemory::DiskPageDBMemory(class MMapChunk* _mmapChunk) {
+DiskKV::DiskKV(class MMapChunk* _mmapChunk, BNodeFactory *factory) {
     mmapChunk = _mmapChunk;
+    btree = new BTree(new DiskBTreeIO(mmapChunk, factory));
 }
 
-uint64_t DiskPageDBMemory::insert(BNode * node) {
-    uint64_t ptr = mmapChunk->insert( node->getData());
-    node->resetData();
-    delete node;
-    return ptr;
-}
-
-BNode *DiskPageDBMemory::get(uint64_t ptr) {
-    auto data = mmapChunk->get(ptr);
-    return new BNode(data, false);
-}
-void DiskPageDBMemory::del(uint64_t ptr) {
-    mmapChunk->del(ptr);
-}
-
-DiskPageDBMemory::~DiskPageDBMemory() = default;
+DiskKV::~DiskKV() = default;

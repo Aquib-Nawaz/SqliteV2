@@ -10,8 +10,6 @@
 #include "bnode.h"
 #include <utility>
 #include "btreeio.h"
-#define BTREE_MAX_KEY_SIZE 4000
-#define BTREE_MAX_VAL_SIZE 12000
 
 class BTreeIterator;
 class BTree {
@@ -35,13 +33,9 @@ class BTree {
         virtual void Insert(std::vector<uint8_t >& key, std::vector<uint8_t >& value, UpdateResult& result);
         virtual bool Delete(std::vector<uint8_t >&, DeleteResult&);
         virtual std::vector<uint8_t > Get(std::vector<uint8_t >&);
+        uint64_t getRoot() const;
+        void setRoot(uint64_t _root);
 };
-std::vector<BNode*> nodeSplit3(BNode* );
-void nodeSplit2(BNode* , BNode* , BNode* );
-void checkLimit(std::vector<uint8_t >&,std::vector<uint8_t >&);
-void nodeMerge(BNode*,BNode*,BNode*);
-void nodeReplace2Kid(BNode*,BNode*,uint16_t, uint64_t , std::vector<uint8_t>&);
-
 
 
 #endif //SQLITEV2_BTREE_H

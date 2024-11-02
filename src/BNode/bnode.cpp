@@ -208,3 +208,68 @@ BNode::~BNode() {
     if(destroy)
         delete[] data;
 }
+
+std::vector<BNode*> BNode::nodeSplit3(BNode* old ){
+    if(old->nBytes()<=BTREE_PAGE_SIZE){
+        old->shrink(1);
+        return { old};
+    }
+    auto * left = new BNode(2);
+    auto* right = new BNode(1);
+    nodeSplit2(left, right, old);
+
+    if(left->nBytes()<=BTREE_PAGE_SIZE) {
+        left->shrink(1);
+        return {left, right};
+    }
+    auto* leftleft = new BNode(1);
+
+    auto* middle = new BNode(1);
+
+    nodeSplit2(leftleft, middle, left);
+
+    assert(leftleft->nBytes()<=BTREE_PAGE_SIZE);
+    return {leftleft, middle, right};
+}
+
+void BNode::nodeSplit2(BNode* left, BNode* right, BNode* old){
+    uint16_t offSize = OFFSET_ARRAY_ELEMENT_SIZE + ( old->bType()==BTREE_INTERIOR?
+                                                     POINTER_ARRAY_ELEMENT_SIZE:0);
+    int i;
+    uint16_t lenReq = HEADER_SIZE;
+
+    for(i=old->nKeys(); lenReq<BTREE_PAGE_SIZE/2; i--){
+        lenReq += offSize + old->getOffset(i)-old->getOffset(i-1);
+    }
+    i++;
+    if(i==old->nKeys())i--;
+    right->_setHeader(old->bType(), old->nKeys()-i);
+    right->nodeAppendRange(old, 0,i, old->nKeys()-i);
+
+    left->_setHeader(old->bType(), i);
+    left->nodeAppendRange(old, 0, 0, i);
+    delete old;
+}
+
+void BNode::checkLimit(std::vector<uint8_t >&key, std::vector<uint8_t >&val){
+    assert(key.size()<=BNODE_MAX_KEY_SIZE && val.size()<=BNODE_MAX_VAL_SIZE && !key.empty());
+}
+
+void BNode::nodeReplace2Kid(BNode* newNode, BNode* oldNode, uint16_t idx, uint64_t ptr,
+                     std::vector<uint8_t > &key){
+    //delete idx and idx+1
+    newNode->_setHeader(BTREE_INTERIOR, oldNode->nKeys()-1);
+    newNode->nodeAppendRange(oldNode,0,0,idx);
+    std::vector<uint8_t >val;
+    newNode->nodeAppendKV(idx, key, val, ptr);
+    newNode->nodeAppendRange(oldNode, idx+1, idx+2, oldNode->nKeys()-idx-2);
+}
+
+void BNode::nodeMerge(BNode* merged, BNode* left, BNode* right){
+    assert(left->bType()==right->bType());
+    merged->_setHeader(left->bType(), left->nKeys()+right->nKeys());
+    merged->nodeAppendRange(left, 0, 0, left->nKeys());
+    merged->nodeAppendRange(right, left->nKeys(), 0, right->nKeys());
+    delete left;
+    delete right;
+}

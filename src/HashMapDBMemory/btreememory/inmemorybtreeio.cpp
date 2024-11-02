@@ -7,9 +7,7 @@
 
 BNode* InMemoryBTreeIO ::get(uint64_t key) {
     assert(memory.count(key));
-    auto ret = new uint8_t [BTREE_PAGE_SIZE];
-    memcpy(ret, memory[key], BTREE_PAGE_SIZE);
-    return new BNode(ret);
+    return nodeFactory->createNode(memory[key], false);
 }
 
 void InMemoryBTreeIO::del(uint64_t key) {
@@ -25,8 +23,9 @@ uint64_t InMemoryBTreeIO::insert(BNode  *val) {
     return count;
 }
 
-InMemoryBTreeIO::InMemoryBTreeIO()  {
+InMemoryBTreeIO::InMemoryBTreeIO(BNodeFactory *factory) {
     count = 0;
+    nodeFactory = factory;
 }
 
 InMemoryBTreeIO::~InMemoryBTreeIO() {

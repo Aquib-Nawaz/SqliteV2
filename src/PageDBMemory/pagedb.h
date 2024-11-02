@@ -9,15 +9,16 @@
 #include <vector>
 #include <utility>
 #include "mmap.h"
+#include "keyvalue.h"
+#include "bnodefactory.h"
 
-class DiskPageDBMemory: public BTree {
+class DiskKV: public KeyValue {
     class MMapChunk* mmapChunk;
+    class BTree* btree;
 public:
-    ~DiskPageDBMemory() override;
-     BNode * get(uint64_t) override;
-    void del(uint64_t) override;
-    uint64_t insert(BNode *) override;
-    explicit DiskPageDBMemory(class MMapChunk*);
+    ~DiskKV() override;
+
+    DiskKV(class MMapChunk*, BNodeFactory* factory);
     void Insert(std::vector<uint8_t> &, std::vector<uint8_t> &, UpdateResult&) override;
     std::vector<uint8_t> Get(std::vector<uint8_t> &) override;
     bool Delete(std::vector<uint8_t >&, DeleteResult&) override;

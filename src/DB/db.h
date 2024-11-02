@@ -7,15 +7,14 @@
 
 #include <string>
 #include "table.h"
-#include "btree.h"
-#include "mmap.h"
+#include "keyvalue.h"
 
 class DB {
-    BTree *btree;
+    KeyValue *kvStore;
     static TableDef Meta_Def;
     bool getTable(std::string const&, TableDef&);
 public:
-    DB(MMapChunk*);
+    explicit DB(KeyValue * kvStore);
     bool CreateTable(TableDef&);
     bool Insert(std::string &, Row&, UpdateResult&);
     bool Get(std::string&, Row&);
